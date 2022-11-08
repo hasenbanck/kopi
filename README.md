@@ -6,7 +6,7 @@ It uses the V8 execution engine to provide JITed ECMAScript execution and aims t
 ## Features
 
  * `getrandom` - V8 expects the implementation to provide a good, strong 
-                 entropy source, or else it might use weak entropy
+                 entropy source, or else it might use a weak entropy
                  sources. This features uses the `getrandom` crate to
                  provide a strong entropy source provided by the operating
                  system.

@@ -168,6 +168,13 @@ impl<'borrow, 'scope> ValueBuilder<'borrow, 'scope> {
         Value::new(self.scope, value)
     }
 
+    /// The boolean value.
+    #[inline(always)]
+    pub fn boolean(&'borrow mut self, boolean: bool) -> Value<'borrow, 'scope> {
+        let value = v8::Boolean::new(self.scope, boolean).into();
+        Value::new(self.scope, value)
+    }
+
     /// Creates a float value.
     #[inline(always)]
     pub fn float(&'borrow mut self, number: f64) -> Value<'borrow, 'scope> {

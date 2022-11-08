@@ -70,6 +70,7 @@ impl<STATE> Runtime<STATE> {
 
         let mut isolate = v8::Isolate::new(config);
 
+        // TODO Test how namespaces are overwritten. Also support "nested" namespaces like "a.b.c".
         let main_context = {
             let isolate_scope = &mut v8::HandleScope::new(&mut isolate);
             isolate_scope.set_data(STATE_DATA_SLOT, state_ptr);

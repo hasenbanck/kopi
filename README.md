@@ -11,6 +11,43 @@ It uses the V8 execution engine to provide JITed ECMAScript execution and aims t
                  provide a strong entropy source provided by the operating
                  system.
 
+## Example
+
+```rust
+use kopi::*;
+
+fastcall_function! {
+    fn mul(x: f64, y: f64) -> f64 {
+        x * y
+    }
+}
+
+initialize_v8(InitializationOptions::default());
+
+let mut extension = Extension::new(None);
+extension.add_function("madd", move |(a, b, c): (f32, f32, f32)| a + (b * c));
+extension.add_fastcall_function("mul", mul);
+
+let mut runtime = Runtime::new(
+    RuntimeOptions {
+        extensions: vec![extension],
+        ..Default::default()
+    },
+    (),
+)
+.expect("Can't create runtime");
+
+let val: i32 = runtime
+    .execute("madd(10, 5, 6)")
+    .expect("Can't execute code");
+
+assert_eq!(val, 40);
+
+let val: i32 = runtime.execute("mul(10, 20)").expect("Can't execute code");
+
+assert_eq!(val, 200);
+```
+
 ## Testing
 
 Some tests need a ICU data file placed inside the project root directory

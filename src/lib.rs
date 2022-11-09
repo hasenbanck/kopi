@@ -65,8 +65,9 @@ pub mod _macros {
 pub mod error;
 mod extension;
 mod runtime;
+mod serialization;
+mod traits;
 pub mod value;
-mod value_traits;
 
 #[cfg(target_pointer_width = "16")]
 compile_error!("16 bit systems are not supported");
@@ -80,10 +81,8 @@ pub use extension::{
     Extension, FastcallFunction, FunctionArguments, FunctionWithStateArguments, StaticFunction,
 };
 pub use runtime::{Runtime, RuntimeOptions};
-pub use value_traits::{
-    from_value_impl::*, into_value_impl::*, FastcallArgument, FastcallReturnValue, FromValue,
-    IntoValue,
-};
+pub use serialization::*;
+pub use traits::{FastcallArgument, FastcallReturnValue, FromValue, IntoValue};
 
 const DEFAULT_V8_FLAGS: &str = "--turbo_fast_api_calls";
 

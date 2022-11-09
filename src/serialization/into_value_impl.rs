@@ -1,11 +1,11 @@
-const MAX_SAFE_INTEGER: i64 = 2i64.pow(53) - 1i64;
-const MIN_SAFE_INTEGER: i64 = -(2i64.pow(53) - 1i64);
-
 use crate::{
     error::TypeError,
+    traits::IntoValue,
     value::{Local, Value, ValueScope},
-    value_traits::IntoValue,
 };
+
+const MAX_SAFE_INTEGER: i64 = 2i64.pow(53) - 1i64;
+const MIN_SAFE_INTEGER: i64 = -(2i64.pow(53) - 1i64);
 
 impl IntoValue for () {
     #[inline(always)]
@@ -149,13 +149,10 @@ impl IntoValue for f64 {
 
 #[cfg(test)]
 mod test {
+    use super::{MAX_SAFE_INTEGER, MIN_SAFE_INTEGER};
     use crate::{
-        initialize_v8,
-        value_traits::{
-            into_value_impl::{MAX_SAFE_INTEGER, MIN_SAFE_INTEGER},
-            IntoValue,
-        },
-        Extension, FunctionArguments, InitializationOptions, Runtime, RuntimeOptions,
+        initialize_v8, traits::IntoValue, Extension, FunctionArguments, InitializationOptions,
+        Runtime, RuntimeOptions,
     };
 
     pub fn test<F, A, R>(expected_type: &str, expected_value: &str, function: F)

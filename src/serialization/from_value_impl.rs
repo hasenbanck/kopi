@@ -1,7 +1,7 @@
 use crate::{
     error::{create_type_error, TypeError},
+    traits::FromValue,
     value::{Local, Value, ValueScope},
-    value_traits::FromValue,
 };
 
 impl FromValue for () {
@@ -366,9 +366,7 @@ impl FromValue for f64 {
 mod test {
     use std::fmt::Debug;
 
-    use crate::{
-        initialize_v8, value_traits::FromValue, InitializationOptions, Runtime, RuntimeOptions,
-    };
+    use crate::{initialize_v8, traits::FromValue, InitializationOptions, Runtime, RuntimeOptions};
 
     fn test_from<STATE, SOURCE, T>(runtime: &mut Runtime<STATE>, source: SOURCE, expected: T)
     where

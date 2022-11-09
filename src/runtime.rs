@@ -10,8 +10,8 @@ pub const STATE_DATA_SLOT: u32 = 0;
 use crate::{
     error::{create_error_from_exception, Error},
     extension::FunctionDeclaration,
+    traits::FromValue,
     value::{create_string, ValueScope},
-    value_traits::FromValue,
     Extension, V8_INITIALIZATION,
 };
 

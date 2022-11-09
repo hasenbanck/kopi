@@ -11,8 +11,8 @@ use v8::NewStringType;
 
 use crate::{
     runtime::STATE_DATA_SLOT,
+    traits::{FromValue, IntoValue},
     value,
-    value_traits::{FromValue, IntoValue},
 };
 
 /// Traits for static functions, which can be called faster than closures.

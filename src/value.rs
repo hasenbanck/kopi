@@ -12,7 +12,7 @@ pub use v8::{
 static MAX_STRING_SIZE: once_cell::sync::Lazy<usize> =
     once_cell::sync::Lazy::new(String::max_length);
 
-/// A scope in which the values can live. Can be used to create new values.
+/// A scope in which values live. Must be used to construct new values.
 #[repr(transparent)]
 pub struct ValueScope<'borrow, 'scope>(pub(crate) &'borrow mut v8::HandleScope<'scope>);
 

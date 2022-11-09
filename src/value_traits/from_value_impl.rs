@@ -1,6 +1,6 @@
 use crate::{
     error::{create_type_error, TypeError},
-    value::{HandleScope, Local, Value},
+    value::{Local, Value, ValueScope},
     value_traits::FromValue,
 };
 
@@ -8,7 +8,7 @@ impl FromValue for () {
     type Value = ();
 
     #[inline(always)]
-    fn from_v8(_scope: &mut HandleScope, _value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(_scope: &mut ValueScope, _value: Local<Value>) -> Result<Self::Value, TypeError> {
         Ok(())
     }
 }
@@ -17,8 +17,16 @@ impl FromValue for bool {
     type Value = bool;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        Ok(value.to_boolean(scope).boolean_value(scope))
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = v8::Local::<v8::Boolean>::try_from(value) {
+            Ok(val.is_true())
+        } else {
+            Err(create_type_error(
+                "Value can't be converted to an i8",
+                scope,
+                &value,
+            ))
+        }
     }
 }
 
@@ -26,8 +34,8 @@ impl FromValue for String {
     type Value = String;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        Ok(value.to_rust_string_lossy(scope))
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+        Ok(scope.value_to_string(&value))
     }
 }
 
@@ -35,7 +43,7 @@ impl FromValue for i8 {
     type Value = i8;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             let val = i8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
@@ -74,7 +82,7 @@ impl FromValue for i16 {
     type Value = i16;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             let val = i16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
@@ -113,7 +121,7 @@ impl FromValue for i32 {
     type Value = i32;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             let val = i32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i32", scope, &value))?;
@@ -150,7 +158,7 @@ impl FromValue for i64 {
     type Value = i64;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             Ok(val.value())
         } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
@@ -184,7 +192,7 @@ impl FromValue for u8 {
     type Value = u8;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             let val = u8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
@@ -223,7 +231,7 @@ impl FromValue for u16 {
     type Value = u16;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             let val = u16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
@@ -262,7 +270,7 @@ impl FromValue for u32 {
     type Value = u32;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             let val = u32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u32", scope, &value))?;
@@ -299,7 +307,7 @@ impl FromValue for u64 {
     type Value = u64;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
             let val = u64::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u64", scope, &value))?;
@@ -336,7 +344,7 @@ impl FromValue for f32 {
     type Value = f32;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         let value = v8::Local::<v8::Number>::try_from(value)
             .map_err(|_| create_type_error("Value not a f32", scope, &value))?;
         Ok(value.value() as f32)
@@ -347,7 +355,7 @@ impl FromValue for f64 {
     type Value = f64;
 
     #[inline(always)]
-    fn from_v8(scope: &mut HandleScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
         let value = v8::Local::<v8::Number>::try_from(value)
             .map_err(|_| create_type_error("Value not a f64", scope, &value))?;
         Ok(value.value())
@@ -401,11 +409,8 @@ mod test {
         initialize_v8(InitializationOptions::default());
         let r = &mut Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
-        test_from(r, "0", false);
-        test_from(r, "1", true);
         test_from(r, "false", false);
         test_from(r, "true", true);
-        test_from(r, "'a_string'", true);
     }
 
     #[test]

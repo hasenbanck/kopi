@@ -9,7 +9,7 @@ use std::{
 
 use crate::{
     runtime::STATE_DATA_SLOT,
-    value::create_string,
+    value,
     value_traits::{FromValue, IntoValue},
 };
 
@@ -77,13 +77,15 @@ pub fn set_result<'scope, R>(
 ) where
     R: 'static + IntoValue,
 {
+    let mut scope = value::ValueScope(scope);
+
     // Some types can skip the serialization, like for example `()`.
     if !R::is_undefined() {
-        let value = match result.into_v8(scope) {
+        let value = match result.into_v8(&mut scope) {
             Ok(value) => value,
             Err(err) => {
-                let msg = create_string(scope, String::from(err));
-                v8::Exception::type_error(scope, msg)
+                let msg = scope.new_string(String::from(err));
+                v8::Exception::type_error(scope.0, msg)
             }
         };
         rv.set(value);
@@ -102,12 +104,14 @@ pub fn get_argument<'scope, A>(
 where
     A: FromValue<Value = A>,
 {
+    let mut scope = value::ValueScope(scope);
+
     let local_value = args.get(pos);
-    return match A::from_v8(scope, local_value) {
+    return match A::from_v8(&mut scope, local_value) {
         Ok(arg) => Some(arg),
         Err(err) => {
-            let msg = create_string(scope, &String::from(err));
-            let exception = v8::Exception::type_error(scope, msg);
+            let msg = scope.new_string(&String::from(err));
+            let exception = v8::Exception::type_error(scope.0, msg);
             rv.set(exception);
             None
         }

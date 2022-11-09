@@ -10,7 +10,7 @@ pub const STATE_DATA_SLOT: u32 = 0;
 use crate::{
     error::{create_error_from_exception, Error},
     extension::FunctionDeclaration,
-    value::create_string,
+    value::{create_string, ValueScope},
     value_traits::FromValue,
     Extension, V8_INITIALIZATION,
 };
@@ -232,7 +232,8 @@ impl<STATE> Runtime<STATE> {
             return create_error_from_exception(try_catch_scope, exception);
         };
 
-        T::from_v8(try_catch_scope, v8_value).map_err(Error::Type)
+        let mut scope = ValueScope(try_catch_scope);
+        T::from_v8(&mut scope, v8_value).map_err(Error::Type)
     }
 }
 

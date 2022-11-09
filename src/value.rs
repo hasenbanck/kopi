@@ -4,9 +4,9 @@ pub use v8::{
     Array, ArrayBuffer, ArrayBufferView, BigInt, BigInt64Array, BigIntObject, BigUint64Array,
     Boolean, BooleanObject, Data, DataView, Date, FixedArray, Float32Array, Float64Array, Function,
     Int16Array, Int32, Int32Array, Int8Array, Integer, Local, Map, Message, NewStringType, Number,
-    Object, Primitive, PrimitiveArray, Promise, Proxy, RegExp, Set, SharedArrayBuffer, StackTrace,
-    String, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array, Uint32, Uint32Array,
-    Uint8Array, Uint8ClampedArray, Value,
+    Object, Primitive, PrimitiveArray, Promise, Proxy, RegExp, Set, SharedArrayBuffer, StackFrame,
+    StackTrace, String, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array, Uint32,
+    Uint32Array, Uint8Array, Uint8ClampedArray, Value,
 };
 
 static MAX_STRING_SIZE: once_cell::sync::Lazy<usize> =
@@ -125,11 +125,27 @@ impl<'borrow, 'scope> ValueScope<'borrow, 'scope> {
     /// Returns the original stack trace that was captured at the creation time of
     /// a given exception if available.
     #[inline(always)]
-    pub fn get_stack_trace(
+    pub fn exception_stack_trace(
         &mut self,
         exception: Local<Value>,
     ) -> Option<Local<'scope, StackTrace>> {
         v8::Exception::get_stack_trace(self.0, exception)
+    }
+
+    /// Returns the current execution stack trace.
+    #[inline(always)]
+    pub fn current_stack_trace(&mut self, frame_limit: usize) -> Option<Local<'scope, StackTrace>> {
+        StackTrace::current_stack_trace(self.0, frame_limit)
+    }
+
+    /// Returns a particular stack frame of a stack trace at the particular index.
+    #[inline(always)]
+    pub fn get_stack_frame(
+        &mut self,
+        stack_trace: &mut Local<StackTrace>,
+        index: usize,
+    ) -> Option<Local<'scope, StackFrame>> {
+        StackTrace::get_frame(stack_trace, self.0, index)
     }
 }
 

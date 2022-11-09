@@ -7,6 +7,8 @@ use std::{
     sync::Arc,
 };
 
+use v8::NewStringType;
+
 use crate::{
     runtime::STATE_DATA_SLOT,
     value,
@@ -84,7 +86,7 @@ pub fn set_result<'scope, R>(
         let value = match result.into_v8(&mut scope) {
             Ok(value) => value,
             Err(err) => {
-                let msg = scope.new_string(String::from(err));
+                let msg = scope.new_string(String::from(err), NewStringType::Normal);
                 v8::Exception::type_error(scope.0, msg)
             }
         };
@@ -110,7 +112,7 @@ where
     return match A::from_v8(&mut scope, local_value) {
         Ok(arg) => Some(arg),
         Err(err) => {
-            let msg = scope.new_string(&String::from(err));
+            let msg = scope.new_string(&String::from(err), NewStringType::Normal);
             let exception = v8::Exception::type_error(scope.0, msg);
             rv.set(exception);
             None

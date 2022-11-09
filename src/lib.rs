@@ -65,7 +65,7 @@ pub mod _macros {
 pub mod error;
 mod extension;
 mod runtime;
-pub mod v8;
+pub mod value;
 mod value_traits;
 
 #[cfg(target_pointer_width = "16")]

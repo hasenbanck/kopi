@@ -4,7 +4,7 @@ macro_rules! fastcall_argument {
             type Value = $value_type;
 
             #[inline(always)]
-            fn v8_type() -> crate::v8::fast_api::Type {
+            fn v8_type() -> v8::fast_api::Type {
                 v8::fast_api::Type::$v8_type
             }
         }
@@ -27,7 +27,7 @@ macro_rules! fastcall_return_value {
             type Value = $value_type;
 
             #[inline(always)]
-            fn c_type() -> crate::v8::fast_api::CType {
+            fn c_type() -> v8::fast_api::CType {
                 v8::fast_api::CType::$c_type
             }
         }

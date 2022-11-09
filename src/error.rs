@@ -2,7 +2,10 @@
 
 use std::fmt::Debug;
 
-use crate::v8::{Exception, HandleScope, Local, Value};
+use crate::{
+    value,
+    value::{Exception, Local, Value},
+};
 
 /// Errors that the crate can throw.
 #[derive(Debug)]
@@ -54,21 +57,24 @@ impl From<TypeError> for String {
 }
 
 /// Shortcut to create a type error.
-pub fn create_type_error(msg: &'static str, scope: &mut HandleScope, value: &Value) -> TypeError {
+pub fn create_type_error(
+    msg: &'static str,
+    scope: &mut value::HandleScope,
+    value: &Value,
+) -> TypeError {
     let source = value.to_rust_string_lossy(scope);
     TypeError { msg, source }
 }
 
 /// Creates an error from an exception.
 pub(crate) fn create_error_from_exception<'scope, T>(
-    scope: &mut HandleScope<'scope>,
+    scope: &mut value::HandleScope<'scope>,
     exception: Option<Local<Value>>,
 ) -> Result<T, Error> {
     let Some(exception) = exception else {
         return Err(Error::Internal("Exception was not set".to_string()));
     };
 
-    let scope = &mut HandleScope::new(scope);
     let msg = Exception::create_message(scope, exception);
 
     // TODO create a proper EcmaScript error from the Local<Message> (lines etc.).

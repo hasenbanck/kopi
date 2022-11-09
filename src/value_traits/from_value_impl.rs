@@ -1,8 +1,6 @@
-use v8::Handle;
-
 use crate::{
     error::{create_type_error, TypeError},
-    v8::{HandleScope, Local, Value},
+    value::{HandleScope, Local, Value},
     value_traits::FromValue,
 };
 

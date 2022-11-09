@@ -1,11 +1,5 @@
-//! Structures to work with V8.
+//! Values to work with V8.
 
-pub(crate) use v8::{
-    fast_api, icu, new_default_platform, new_single_threaded_default_platform, Context,
-    ContextScope, CreateParams, External, Function, FunctionCallback, FunctionCallbackArguments,
-    FunctionTemplate, Global, Isolate, MapFnTo, ObjectTemplate, OwnedIsolate, ReturnValue, Script,
-    TryCatch, V8,
-};
 pub use v8::{
     null, undefined, Array, ArrayBuffer, ArrayBufferView, BigInt, BigInt64Array, BigIntObject,
     BigUint64Array, Boolean, Data, DataView, Date, Exception, Float32Array, Float64Array,

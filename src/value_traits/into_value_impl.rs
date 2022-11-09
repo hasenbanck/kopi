@@ -5,7 +5,7 @@ const MIN_SAFE_INTEGER: i64 = -(2i64.pow(53) - 1i64);
 
 use crate::{
     error::TypeError,
-    v8::{HandleScope, Local, Value},
+    value::{HandleScope, Local, Value},
     value_traits::IntoValue,
 };
 

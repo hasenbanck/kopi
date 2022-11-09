@@ -9,8 +9,7 @@ use std::{
 
 use crate::{
     runtime::STATE_DATA_SLOT,
-    v8,
-    v8::MapFnTo,
+    value::create_string,
     value_traits::{FromValue, IntoValue},
 };
 
@@ -83,7 +82,7 @@ pub fn set_result<'scope, R>(
         let value = match result.into_v8(scope) {
             Ok(value) => value,
             Err(err) => {
-                let msg = v8::create_string(scope, String::from(err));
+                let msg = create_string(scope, String::from(err));
                 v8::Exception::type_error(scope, msg)
             }
         };
@@ -107,7 +106,7 @@ where
     return match A::from_v8(scope, local_value) {
         Ok(arg) => Some(arg),
         Err(err) => {
-            let msg = v8::create_string(scope, &String::from(err));
+            let msg = create_string(scope, &String::from(err));
             let exception = v8::Exception::type_error(scope, msg);
             rv.set(exception);
             None
@@ -384,6 +383,8 @@ impl<STATE> Extension<STATE> {
         A: FunctionArguments<F, R>,
         R: IntoValue,
     {
+        use v8::MapFnTo;
+
         let name = name.into();
 
         // We wrap the function in an Arc, so that it's lifetime can be tracked on runtimes and
@@ -423,6 +424,8 @@ impl<STATE> Extension<STATE> {
         A: FunctionWithStateArguments<F, R, STATE>,
         R: IntoValue,
     {
+        use v8::MapFnTo;
+
         let name = name.into();
 
         // We leak the callback to give it a static lifetime, so that V8 can call it safely.

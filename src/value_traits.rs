@@ -1,7 +1,7 @@
 ///! Traits to abstract common operations on ECMAScript values.
 use crate::{
     error::TypeError,
-    v8::{HandleScope, Local, Value},
+    value::{HandleScope, Local, Value},
 };
 
 pub(crate) mod fastcall_impl;

@@ -1,12 +1,21 @@
-use crate::{error::TypeError, value::ValueBuilder, IntoValue, Value};
+use v8::undefined;
+
+const MAX_SAFE_INTEGER: i64 = 2i64.pow(53) - 1i64;
+const MIN_SAFE_INTEGER: i64 = -(2i64.pow(53) - 1i64);
+
+use crate::{
+    error::TypeError,
+    v8::{HandleScope, Local, Value},
+    value_traits::IntoValue,
+};
 
 impl IntoValue for () {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.undefined())
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(undefined(scope).into())
     }
 
     fn is_undefined() -> bool {
@@ -16,131 +25,139 @@ impl IntoValue for () {
 
 impl IntoValue for bool {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.boolean(self))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Boolean::new(scope, self).into())
     }
 }
 
 impl IntoValue for i8 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.integer(i32::from(self)))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Integer::new(scope, i32::from(self)).into())
     }
 }
 
 impl IntoValue for i16 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.integer(i32::from(self)))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Integer::new(scope, i32::from(self)).into())
     }
 }
 
 impl IntoValue for i32 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.integer(self))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Integer::new(scope, self).into())
     }
 }
 
 impl IntoValue for i64 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        if self > i32::MAX as i64 || self < i32::MIN as i64 {
-            Ok(value_builder.bigint_from_i64(self))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        if self > MAX_SAFE_INTEGER || self < MIN_SAFE_INTEGER {
+            Ok(v8::BigInt::new_from_i64(scope, self).into())
+        } else if self > i32::MAX as i64 || self < i32::MIN as i64 {
+            Ok(v8::Number::new(scope, self as f64).into())
         } else {
-            Ok(value_builder.integer(self as i32))
+            Ok(v8::Integer::new(scope, self as i32).into())
         }
     }
 }
 
 impl IntoValue for u8 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.integer(self as i32))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Integer::new(scope, i32::from(self)).into())
     }
 }
 
 impl IntoValue for u16 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.integer(self as i32))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Integer::new(scope, i32::from(self)).into())
     }
 }
 
 impl IntoValue for u32 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
         if self > i32::MAX as u32 {
-            Ok(value_builder.bigint_from_u64(self as u64))
+            Ok(v8::Number::new(scope, self as f64).into())
         } else {
-            Ok(value_builder.integer(self as i32))
+            Ok(v8::Integer::new(scope, self as i32).into())
         }
     }
 }
 
 impl IntoValue for u64 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        if self > i32::MAX as u64 {
-            Ok(value_builder.bigint_from_u64(self))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        if self > MAX_SAFE_INTEGER as u64 {
+            Ok(v8::BigInt::new_from_u64(scope, self).into())
+        } else if self > i32::MAX as u64 {
+            Ok(v8::Number::new(scope, self as f64).into())
         } else {
-            Ok(value_builder.integer(self as i32))
+            Ok(v8::Integer::new(scope, self as i32).into())
         }
     }
 }
 
 impl IntoValue for f32 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.float(self as f64))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Number::new(scope, f64::from(self)).into())
     }
 }
 
 impl IntoValue for f64 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
+    fn into_v8<'scope>(
         self,
-        value_builder: &'borrow mut ValueBuilder<'borrow, 'scope>,
-    ) -> Result<Value<'borrow, 'scope>, TypeError> {
-        Ok(value_builder.float(self))
+        scope: &mut HandleScope<'scope>,
+    ) -> Result<Local<'scope, Value>, TypeError> {
+        Ok(v8::Number::new(scope, self).into())
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::{
-        initialize_v8, Extension, FunctionArguments, InitializationOptions, IntoValue, Runtime,
-        RuntimeOptions,
+        initialize_v8,
+        value_traits::{
+            into_value_impl::{MAX_SAFE_INTEGER, MIN_SAFE_INTEGER},
+            IntoValue,
+        },
+        Extension, FunctionArguments, InitializationOptions, Runtime, RuntimeOptions,
     };
 
     pub fn test<F, A, R>(expected_type: &str, expected_value: &str, function: F)
@@ -193,6 +210,8 @@ mod test {
         test("number", "2147483647", |()| i32::MAX);
         test("number", "-2147483648", |()| i32::MIN as i64);
         test("number", "2147483647", |()| i32::MAX as i64);
+        test("number", "-9007199254740991", |()| MIN_SAFE_INTEGER);
+        test("number", "9007199254740991", |()| MAX_SAFE_INTEGER);
         test("bigint", "-9223372036854775808n", |()| i64::MIN);
         test("bigint", "9223372036854775807n", |()| i64::MAX);
 
@@ -202,9 +221,15 @@ mod test {
         test("number", "65535", |()| u16::MAX);
         test("number", "0", |()| u32::MIN);
         test("number", "2147483647", |()| i32::MAX as u32);
-        test("bigint", "4294967295n", |()| u32::MAX);
+        test("number", "4294967295", |()| u32::MAX);
         test("number", "0", |()| u64::MIN);
         test("bigint", "9223372036854775807n", |()| i64::MAX as u64);
         test("bigint", "18446744073709551615n", |()| u64::MAX);
+    }
+
+    #[test]
+    fn safe_integer() {
+        assert_eq!(MIN_SAFE_INTEGER, -9007199254740991);
+        assert_eq!(MAX_SAFE_INTEGER, 9007199254740991);
     }
 }

@@ -65,7 +65,8 @@ pub mod _macros {
 pub mod error;
 mod extension;
 mod runtime;
-mod value;
+pub mod v8;
+mod value_traits;
 
 #[cfg(target_pointer_width = "16")]
 compile_error!("16 bit systems are not supported");
@@ -79,9 +80,9 @@ pub use extension::{
     Extension, FastcallFunction, FunctionArguments, FunctionWithStateArguments, StaticFunction,
 };
 pub use runtime::{Runtime, RuntimeOptions};
-pub use value::{
+pub use value_traits::{
     from_value_impl::*, into_value_impl::*, FastcallArgument, FastcallReturnValue, FromValue,
-    IntoValue, Value, ValueBuilder,
+    IntoValue,
 };
 
 const DEFAULT_V8_FLAGS: &str = "--turbo_fast_api_calls";
@@ -93,9 +94,6 @@ const ICU_FILE_NAME: &str = "icudt71l.dat";
 const ICU_FILE_NAME: &'static str = "icudt71b.dat";
 
 static V8_INITIALIZATION: std::sync::Once = std::sync::Once::new();
-
-static MAX_STRING_SIZE: once_cell::sync::Lazy<usize> =
-    once_cell::sync::Lazy::new(v8::String::max_length);
 
 /// Represents the version number of the V8 engine.
 #[derive(Copy, Clone)]
@@ -295,28 +293,6 @@ pub fn prepare_icu_data<D: AsRef<[u8]>>(data: D) -> Option<&'static [Aligned16]>
             .collect();
         Some(aligned.leak())
     }
-}
-
-/// Utility function to safely create string. Will truncate string if they are too long.
-pub(crate) fn create_string<'scope, S: AsRef<str>>(
-    scope: &mut v8::HandleScope<'scope, ()>,
-    string: S,
-) -> v8::Local<'scope, v8::String> {
-    let data = string.as_ref().as_bytes();
-    let max_length = usize::min(*MAX_STRING_SIZE, data.len());
-    v8::String::new_from_utf8(scope, &data[..max_length], v8::NewStringType::Normal)
-        .expect("String is too large for V8")
-}
-
-/// Utility function to safely create a string from static string data. Will truncate string if they are too long.
-pub(crate) fn create_string_from_static<'scope>(
-    scope: &mut v8::HandleScope<'scope>,
-    string: &'static str,
-) -> v8::Local<'scope, v8::String> {
-    let data = string.as_bytes();
-    let max_length = usize::min(*MAX_STRING_SIZE, data.len());
-    v8::String::new_external_onebyte_static(scope, &data[..max_length])
-        .expect("String is too large for V8")
 }
 
 #[cfg(test)]

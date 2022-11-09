@@ -2,16 +2,17 @@
 
 use std::{any::Any, cell::RefCell, ffi::c_void, rc::Rc, sync::Arc};
 
+use crate::v8;
+
 // Needs to be public for the `static_function` macro.
 /// Slot inside the runtime in which we safe a Rc<RefCell<S>> to the state S.
 #[doc(hidden)]
 pub const STATE_DATA_SLOT: u32 = 0;
 
 use crate::{
-    create_string,
     error::{create_error_from_exception, Error},
     extension::FunctionDeclaration,
-    value::{FromValue, Value},
+    value_traits::FromValue,
     Extension, V8_INITIALIZATION,
 };
 
@@ -88,7 +89,7 @@ impl<STATE> Runtime<STATE> {
                 .filter(|e| e.namespace.is_none())
             {
                 for (function_name, function_declaration) in declarations.drain() {
-                    let function_name = create_string(isolate_scope, function_name);
+                    let function_name = v8::create_string(isolate_scope, function_name);
 
                     let function = match function_declaration {
                         FunctionDeclaration::Closure {
@@ -136,11 +137,11 @@ impl<STATE> Runtime<STATE> {
                 .filter(|e| e.namespace.is_some())
             {
                 if let Some(namespace) = namespace {
-                    let namespace_name = create_string(global_context_scope, namespace);
+                    let namespace_name = v8::create_string(global_context_scope, namespace);
                     let namespace_object = v8::Object::new(global_context_scope);
 
                     for (function_name, function_declaration) in declarations.drain() {
-                        let function_name = create_string(global_context_scope, function_name);
+                        let function_name = v8::create_string(global_context_scope, function_name);
 
                         let function = match function_declaration {
                             FunctionDeclaration::Closure {
@@ -218,7 +219,7 @@ impl<STATE> Runtime<STATE> {
         let source = source.as_ref();
 
         let scope = &mut v8::HandleScope::with_context(&mut self.isolate, &self.main_context);
-        let source = create_string(scope, source);
+        let source = v8::create_string(scope, source);
 
         let try_catch_scope = &mut v8::TryCatch::new(scope);
 
@@ -232,7 +233,7 @@ impl<STATE> Runtime<STATE> {
             return create_error_from_exception(try_catch_scope, exception);
         };
 
-        T::from_v8(Value::new(try_catch_scope, v8_value)).map_err(Error::Type)
+        T::from_v8(try_catch_scope, v8_value).map_err(Error::Type)
     }
 }
 

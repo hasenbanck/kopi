@@ -7,26 +7,31 @@ mod int32;
 mod integer;
 mod number;
 mod primitive;
+mod stack_trace;
 mod string;
 mod uint32;
 
-pub use bigint::BigInt;
-pub use boolean::Boolean;
-pub use error::Error;
-pub use int32::Int32;
-pub use integer::Integer;
-pub use number::Number;
-pub use primitive::Primitive;
 pub(crate) use string::new_string;
-pub use string::{NewStringType, String};
-pub use uint32::Uint32;
-// TODO wrap all exports.
+// TODO wrap all V8 exports.
 pub use v8::{
     Array, ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array,
     BooleanObject, Data, DataView, Date, FixedArray, Float32Array, Float64Array, Function,
-    Int16Array, Int32Array, Int8Array, Local, Map, Message, Name, Object, PrimitiveArray, Promise,
-    Proxy, RegExp, Set, SharedArrayBuffer, StackFrame, StackTrace, StringObject, Symbol,
-    SymbolObject, TypedArray, Uint16Array, Uint32Array, Uint8Array, Uint8ClampedArray,
+    Int16Array, Int32Array, Int8Array, Map, Message, Name, Object, PrimitiveArray, Promise, Proxy,
+    RegExp, Set, SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array,
+    Uint32Array, Uint8Array, Uint8ClampedArray,
+};
+
+pub use self::{
+    bigint::BigInt,
+    boolean::Boolean,
+    error::Error,
+    int32::Int32,
+    integer::Integer,
+    number::Number,
+    primitive::Primitive,
+    stack_trace::{StackFrame, StackTrace},
+    string::{NewStringType, String},
+    uint32::Uint32,
 };
 
 /// Trait for sealing private types. `T` is the public type into which the private type is sealed.
@@ -67,32 +72,6 @@ impl<'borrow, 'scope> Unseal<&'borrow mut v8::HandleScope<'scope>>
     }
 }
 
-// TODO remove all constructors from this struct. The `ValueScope` should only act as a lifetime marker.
-impl<'scope> ValueScope<'scope> {
-    /// Returns the original stack trace that was captured at the creation time of
-    /// a given exception if available.
-    #[inline(always)]
-    pub fn exception_stack_trace(&mut self, exception: Value) -> Option<Local<'scope, StackTrace>> {
-        v8::Exception::get_stack_trace(&mut self.0, exception.unseal())
-    }
-
-    /// Returns the current execution stack trace.
-    #[inline(always)]
-    pub fn current_stack_trace(&mut self, frame_limit: usize) -> Option<Local<'scope, StackTrace>> {
-        StackTrace::current_stack_trace(&mut self.0, frame_limit)
-    }
-
-    /// Returns a particular stack frame of a stack trace at the particular index.
-    #[inline(always)]
-    pub fn get_stack_frame(
-        &mut self,
-        stack_trace: &mut Local<StackTrace>,
-        index: usize,
-    ) -> Option<Local<'scope, StackFrame>> {
-        StackTrace::get_frame(stack_trace, &mut self.0, index)
-    }
-}
-
 /// The superclass of all types.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
@@ -107,7 +86,7 @@ impl<'scope> Seal<Value<'scope>> for v8::Local<'scope, v8::Value> {
 
 impl<'scope> Unseal<v8::Local<'scope, v8::Value>> for Value<'scope> {
     #[inline(always)]
-    fn unseal(self) -> Local<'scope, v8::Value> {
+    fn unseal(self) -> v8::Local<'scope, v8::Value> {
         self.0
     }
 }

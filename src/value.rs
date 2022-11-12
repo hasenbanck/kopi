@@ -1,141 +1,85 @@
-//! Values to work with V8.
+//! Values used inside the ECMAScript engine.
 
+mod bigint;
+mod boolean;
+mod error;
+mod int32;
+mod integer;
+mod number;
+mod primitive;
+mod string;
+mod uint32;
+
+pub use bigint::BigInt;
+pub use boolean::Boolean;
+pub use error::Error;
+pub use int32::Int32;
+pub use integer::Integer;
+pub use number::Number;
+pub use primitive::Primitive;
+pub(crate) use string::new_string;
+pub use string::{NewStringType, String};
+pub use uint32::Uint32;
+// TODO wrap all exports.
 pub use v8::{
-    Array, ArrayBuffer, ArrayBufferView, BigInt, BigInt64Array, BigIntObject, BigUint64Array,
-    Boolean, BooleanObject, Data, DataView, Date, FixedArray, Float32Array, Float64Array, Function,
-    Int16Array, Int32, Int32Array, Int8Array, Integer, Local, Map, Message, NewStringType, Number,
-    Object, Primitive, PrimitiveArray, Promise, Proxy, RegExp, Set, SharedArrayBuffer, StackFrame,
-    StackTrace, String, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array, Uint32,
-    Uint32Array, Uint8Array, Uint8ClampedArray, Value,
+    Array, ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array,
+    BooleanObject, Data, DataView, Date, FixedArray, Float32Array, Float64Array, Function,
+    Int16Array, Int32Array, Int8Array, Local, Map, Message, Name, Object, PrimitiveArray, Promise,
+    Proxy, RegExp, Set, SharedArrayBuffer, StackFrame, StackTrace, StringObject, Symbol,
+    SymbolObject, TypedArray, Uint16Array, Uint32Array, Uint8Array, Uint8ClampedArray,
 };
 
-static MAX_STRING_SIZE: once_cell::sync::Lazy<usize> =
-    once_cell::sync::Lazy::new(String::max_length);
+/// Trait for sealing private types. `T` is the public type into which the private type is sealed.
+pub(crate) trait Seal<T> {
+    fn seal(self) -> T;
+}
 
-/// A scope in which values live. Must be used to construct new values.
+/// Trait for unsealing public types. `T` is the private type into which the public type is unsealed.
+pub(crate) trait Unseal<T> {
+    fn unseal(self) -> T;
+}
+
+/// Scopes the lifetime of values.
 #[repr(transparent)]
-pub struct ValueScope<'borrow, 'scope>(pub(crate) &'borrow mut v8::HandleScope<'scope>);
+pub struct ValueScope<'scope>(
+    // We created the ValueScope to shield the public API from the functionality that
+    // v8::HandleScope exposes.
+    v8::HandleScope<'scope>,
+);
 
-// TODO create the missing value constructors
-impl<'borrow, 'scope> ValueScope<'borrow, 'scope> {
-    /// Creates a string representation from the given value.
-    #[inline(always)]
-    pub fn value_to_string(&mut self, value: &Value) -> std::string::String {
-        value.to_rust_string_lossy(self.0)
+impl<'borrow, 'scope> Seal<&'borrow mut ValueScope<'scope>>
+    for &'borrow mut v8::HandleScope<'scope>
+{
+    fn seal(self) -> &'borrow mut ValueScope<'scope> {
+        // SAFETY: Safe because ValueScope is a transparent representation of v8::HandleScope.
+        //         https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
+        unsafe { &mut *(self as *mut v8::HandleScope<'scope> as *mut ValueScope<'scope>) }
     }
+}
 
-    /// Creates a new string. Will truncate string if they are too long.
-    pub fn new_string<S: AsRef<str>>(
-        &mut self,
-        string: S,
-        string_type: NewStringType,
-    ) -> Local<'scope, String> {
-        let data = string.as_ref().as_bytes();
-        let max_length = usize::min(*MAX_STRING_SIZE, data.len());
-        String::new_from_utf8(self.0, &data[..max_length], string_type)
-            .expect("String is too large for V8")
+impl<'borrow, 'scope> Unseal<&'borrow mut v8::HandleScope<'scope>>
+    for &'borrow mut ValueScope<'scope>
+{
+    fn unseal(self) -> &'borrow mut v8::HandleScope<'scope> {
+        // SAFETY: Safe because ValueScope is a transparent representation of v8::HandleScope.
+        //         https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
+        unsafe { &mut *(self as *mut ValueScope<'scope> as *mut v8::HandleScope<'scope>) }
     }
+}
 
-    ///Creates a new string from a static string. Will truncate string if they are too long.
-    pub fn new_string_from_static(&mut self, string: &'static str) -> Local<'scope, String> {
-        let data = string.as_bytes();
-        let max_length = usize::min(*MAX_STRING_SIZE, data.len());
-        String::new_external_onebyte_static(self.0, &data[..max_length])
-            .expect("String is too large for V8")
-    }
-
-    /// Creates a new undefined value.
-    #[inline(always)]
-    pub fn new_undefined(&mut self) -> Local<'scope, Primitive> {
-        v8::undefined(self.0)
-    }
-
-    /// Creates a new null value.
-    #[inline(always)]
-    pub fn new_null(&mut self) -> Local<'scope, Primitive> {
-        v8::null(self.0)
-    }
-
-    /// Creates a new integer value.
-    #[inline(always)]
-    pub fn new_integer(&mut self, value: i32) -> Local<'scope, Integer> {
-        Integer::new(self.0, value)
-    }
-
-    /// Creates a new number value.
-    #[inline(always)]
-    pub fn new_number(&mut self, value: f64) -> Local<'scope, Number> {
-        Number::new(self.0, value)
-    }
-
-    /// Creates a new boolean value.
-    #[inline(always)]
-    pub fn new_boolean(&mut self, value: bool) -> Local<'scope, Boolean> {
-        Boolean::new(self.0, value)
-    }
-
-    /// Creates a new big integer value for a u64.
-    #[inline(always)]
-    pub fn new_bigint_from_u64(&mut self, value: u64) -> Local<'scope, BigInt> {
-        BigInt::new_from_u64(self.0, value)
-    }
-
-    /// Creates a new big integer value for a i64.
-    #[inline(always)]
-    pub fn new_bigint_from_i64(&mut self, value: i64) -> Local<'scope, BigInt> {
-        BigInt::new_from_i64(self.0, value)
-    }
-
-    /// Creates a new error.
-    #[inline(always)]
-    pub fn new_error(&mut self, message: Local<String>) -> Local<'scope, Value> {
-        v8::Exception::error(self.0, message)
-    }
-
-    /// Creates a new range error.
-    #[inline(always)]
-    pub fn new_range_error(&mut self, message: Local<String>) -> Local<'scope, Value> {
-        v8::Exception::range_error(self.0, message)
-    }
-
-    /// Creates a new reference error.
-    #[inline(always)]
-    pub fn new_reference_error(&mut self, message: Local<String>) -> Local<'scope, Value> {
-        v8::Exception::reference_error(self.0, message)
-    }
-
-    /// Creates a new syntax error.
-    #[inline(always)]
-    pub fn new_syntax_error(&mut self, message: Local<String>) -> Local<'scope, Value> {
-        v8::Exception::syntax_error(self.0, message)
-    }
-
-    /// Creates a new type error.
-    #[inline(always)]
-    pub fn new_type_error(&mut self, message: Local<String>) -> Local<'scope, Value> {
-        v8::Exception::type_error(self.0, message)
-    }
-
-    /// Creates an error message for the given exception.
-    #[inline(always)]
-    pub fn new_message(&mut self, exception: Local<Value>) -> Local<'scope, Message> {
-        v8::Exception::create_message(self.0, exception)
-    }
-
+// TODO remove all constructors from this struct. The `ValueScope` should only act as a lifetime marker.
+impl<'scope> ValueScope<'scope> {
     /// Returns the original stack trace that was captured at the creation time of
     /// a given exception if available.
     #[inline(always)]
-    pub fn exception_stack_trace(
-        &mut self,
-        exception: Local<Value>,
-    ) -> Option<Local<'scope, StackTrace>> {
-        v8::Exception::get_stack_trace(self.0, exception)
+    pub fn exception_stack_trace(&mut self, exception: Value) -> Option<Local<'scope, StackTrace>> {
+        v8::Exception::get_stack_trace(&mut self.0, exception.unseal())
     }
 
     /// Returns the current execution stack trace.
     #[inline(always)]
     pub fn current_stack_trace(&mut self, frame_limit: usize) -> Option<Local<'scope, StackTrace>> {
-        StackTrace::current_stack_trace(self.0, frame_limit)
+        StackTrace::current_stack_trace(&mut self.0, frame_limit)
     }
 
     /// Returns a particular stack frame of a stack trace at the particular index.
@@ -145,17 +89,77 @@ impl<'borrow, 'scope> ValueScope<'borrow, 'scope> {
         stack_trace: &mut Local<StackTrace>,
         index: usize,
     ) -> Option<Local<'scope, StackFrame>> {
-        StackTrace::get_frame(stack_trace, self.0, index)
+        StackTrace::get_frame(stack_trace, &mut self.0, index)
     }
 }
 
-/// Utility function to safely create string. Will truncate string if they are too long.
-pub(crate) fn create_string<'scope, S: AsRef<str>>(
-    scope: &mut v8::HandleScope<'scope, ()>,
-    string: S,
-) -> Local<'scope, String> {
-    let data = string.as_ref().as_bytes();
-    let max_length = usize::min(*MAX_STRING_SIZE, data.len());
-    String::new_from_utf8(scope, &data[..max_length], NewStringType::Normal)
-        .expect("String is too large for V8")
+/// The superclass of all types.
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct Value<'scope>(v8::Local<'scope, v8::Value>);
+
+impl<'scope> Seal<Value<'scope>> for v8::Local<'scope, v8::Value> {
+    #[inline(always)]
+    fn seal(self) -> Value<'scope> {
+        Value(self)
+    }
+}
+
+impl<'scope> Unseal<v8::Local<'scope, v8::Value>> for Value<'scope> {
+    #[inline(always)]
+    fn unseal(self) -> Local<'scope, v8::Value> {
+        self.0
+    }
+}
+
+impl<'scope> Value<'scope> {
+    /// Creates a new value.
+    #[inline(always)]
+    pub fn new(value: v8::Local<'scope, v8::Value>) -> Value<'scope> {
+        Value(value)
+    }
+
+    /// Returns true if the value is null.
+    #[inline(always)]
+    pub fn is_null(&self) -> bool {
+        self.0.is_null()
+    }
+
+    /// Returns true if the value is undefined.
+    #[inline(always)]
+    pub fn is_undefined(&self) -> bool {
+        self.0.is_undefined()
+    }
+
+    /// Returns the string representation of the value.
+    #[inline(always)]
+    pub fn to_string_representation(&self, scope: &mut ValueScope<'scope>) -> std::string::String {
+        self.0.to_rust_string_lossy(scope.unseal())
+    }
+
+    /// Returns the bool representation of the value.
+    #[inline(always)]
+    pub fn to_boolean_representation(&self, scope: &mut ValueScope<'scope>) -> bool {
+        self.0.boolean_value(scope.unseal())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::ValueScope;
+
+    #[test]
+    fn scope_transmute_safety() {
+        // Make sure that both types are of the same size and alignment.
+        assert_eq!(
+            std::mem::size_of::<ValueScope>(),
+            std::mem::size_of::<v8::HandleScope>()
+        );
+        assert_eq!(
+            std::mem::align_of::<ValueScope>(),
+            std::mem::align_of::<v8::HandleScope>()
+        );
+        // Make sure that we don't have a ZST.
+        assert_ne!(std::mem::size_of::<ValueScope>(), 0);
+    }
 }

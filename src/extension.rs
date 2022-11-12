@@ -12,7 +12,7 @@ use v8::NewStringType;
 use crate::{
     runtime::STATE_DATA_SLOT,
     traits::{FromValue, IntoValue},
-    value,
+    value::{self, Seal, Unseal},
 };
 
 /// Traits for static functions, which can be called faster than closures.
@@ -79,18 +79,18 @@ pub fn set_result<'scope, R>(
 ) where
     R: 'static + IntoValue,
 {
-    let mut scope = value::ValueScope(scope);
+    let scope = scope.seal();
 
     // Some types can skip the serialization, like for example `()`.
     if !R::is_undefined() {
-        let value = match result.into_v8(&mut scope) {
+        let value = match result.into_v8(scope) {
             Ok(value) => value,
             Err(err) => {
-                let msg = scope.new_string(String::from(err), NewStringType::Normal);
-                v8::Exception::type_error(scope.0, msg)
+                let msg = value::String::new(scope, String::from(err), NewStringType::Normal);
+                value::Error::new_type_error(scope, msg)
             }
         };
-        rv.set(value);
+        rv.set(value.unseal());
     }
 }
 
@@ -106,15 +106,15 @@ pub fn get_argument<'scope, A>(
 where
     A: FromValue<Value = A>,
 {
-    let mut scope = value::ValueScope(scope);
+    let scope = scope.seal();
 
     let local_value = args.get(pos);
-    return match A::from_v8(&mut scope, local_value) {
+    return match A::from_v8(scope, local_value.seal()) {
         Ok(arg) => Some(arg),
         Err(err) => {
-            let msg = scope.new_string(&String::from(err), NewStringType::Normal);
-            let exception = v8::Exception::type_error(scope.0, msg);
-            rv.set(exception);
+            let msg = value::String::new(scope, &String::from(err), NewStringType::Normal);
+            let error = value::Error::new_type_error(scope, msg);
+            rv.set(error.unseal());
             None
         }
     };

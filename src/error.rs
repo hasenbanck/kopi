@@ -2,10 +2,7 @@
 
 use std::fmt::Debug;
 
-use crate::{
-    value,
-    value::{Local, Value},
-};
+use crate::value::{Value, ValueScope};
 
 /// Errors that the crate can throw.
 #[derive(Debug)]
@@ -57,19 +54,19 @@ impl From<TypeError> for String {
 }
 
 /// Shortcut to create a type error.
-pub fn create_type_error(
+pub fn create_type_error<'scope>(
     msg: &'static str,
-    scope: &mut value::ValueScope,
-    value: &Value,
+    scope: &mut ValueScope<'scope>,
+    value: &Value<'scope>,
 ) -> TypeError {
-    let source = value.to_rust_string_lossy(scope.0);
+    let source = value.to_string_representation(scope);
     TypeError { msg, source }
 }
 
 /// Creates an error from an exception.
 pub(crate) fn create_error_from_exception<T>(
     scope: &mut v8::HandleScope,
-    exception: Option<Local<Value>>,
+    exception: Option<v8::Local<v8::Value>>,
 ) -> Result<T, Error> {
     let Some(exception) = exception else {
         return Err(Error::Internal("Exception was not set".to_string()));

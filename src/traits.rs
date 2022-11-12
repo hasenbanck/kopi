@@ -1,16 +1,13 @@
 ///! Traits to abstract common operations on ECMAScript values.
 use crate::{
     error::TypeError,
-    value::{Local, Value, ValueScope},
+    value::{Value, ValueScope},
 };
 
 /// Trait to convert a Rust value into a [`Value`] using a [`ValueBuilder`].
 pub trait IntoValue {
     /// Needs to convert the given type to a [`Value`].
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError>;
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError>;
 
     /// Defines if the type is generally `undefined`. Most useful for the `()` type, where we don't
     /// want to set any return value at all. Standard implementation should be fine for most
@@ -27,7 +24,10 @@ pub trait FromValue {
     type Value;
 
     /// Needs to convert the given [`Local<Value>`] into the expected type.
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError>;
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError>;
 }
 
 /// Trait for types that are supported to be used as arguments for fastcall functions.

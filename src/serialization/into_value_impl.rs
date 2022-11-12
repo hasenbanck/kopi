@@ -1,7 +1,7 @@
 use crate::{
     error::TypeError,
     traits::IntoValue,
-    value::{Local, Value, ValueScope},
+    value::{BigInt, Boolean, Integer, Number, Primitive, Value, ValueScope},
 };
 
 const MAX_SAFE_INTEGER: i64 = 2i64.pow(53) - 1i64;
@@ -9,11 +9,8 @@ const MIN_SAFE_INTEGER: i64 = -(2i64.pow(53) - 1i64);
 
 impl IntoValue for () {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_undefined().into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Primitive::new_undefined(scope).into())
     }
 
     fn is_undefined() -> bool {
@@ -23,127 +20,90 @@ impl IntoValue for () {
 
 impl IntoValue for bool {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_boolean(self).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Boolean::new(scope, self).into())
     }
 }
 
 impl IntoValue for i8 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_integer(i32::from(self)).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Integer::new_from_i32(scope, i32::from(self)).into())
     }
 }
 
 impl IntoValue for i16 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_integer(i32::from(self)).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Integer::new_from_i32(scope, i32::from(self)).into())
     }
 }
 
 impl IntoValue for i32 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_integer(self).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Integer::new_from_i32(scope, self).into())
     }
 }
 
 impl IntoValue for i64 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         if self > MAX_SAFE_INTEGER || self < MIN_SAFE_INTEGER {
-            Ok(scope.new_bigint_from_i64(self).into())
+            Ok(BigInt::new_from_i64(scope, self).into())
         } else if self > i32::MAX as i64 || self < i32::MIN as i64 {
-            Ok(scope.new_number(self as f64).into())
+            Ok(Number::new(scope, self as f64).into())
         } else {
-            Ok(scope.new_integer(self as i32).into())
+            Ok(Integer::new_from_i32(scope, self as i32).into())
         }
     }
 }
 
 impl IntoValue for u8 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_integer(i32::from(self)).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Integer::new_from_u32(scope, u32::from(self)).into())
     }
 }
 
 impl IntoValue for u16 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_integer(i32::from(self)).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Integer::new_from_u32(scope, u32::from(self)).into())
     }
 }
 
 impl IntoValue for u32 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        if self > i32::MAX as u32 {
-            Ok(scope.new_number(self as f64).into())
-        } else {
-            Ok(scope.new_integer(self as i32).into())
-        }
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Integer::new_from_u32(scope, self).into())
     }
 }
 
 impl IntoValue for u64 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         if self > MAX_SAFE_INTEGER as u64 {
-            Ok(scope.new_bigint_from_u64(self).into())
-        } else if self > i32::MAX as u64 {
-            Ok(scope.new_number(self as f64).into())
+            Ok(BigInt::new_from_u64(scope, self).into())
+        } else if self > u32::MAX as u64 {
+            Ok(Number::new(scope, self as f64).into())
         } else {
-            Ok(scope.new_integer(self as i32).into())
+            Ok(Integer::new_from_u32(scope, self as u32).into())
         }
     }
 }
 
 impl IntoValue for f32 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_number(f64::from(self)).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Number::new(scope, f64::from(self)).into())
     }
 }
 
 impl IntoValue for f64 {
     #[inline(always)]
-    fn into_v8<'borrow, 'scope>(
-        self,
-        scope: &mut ValueScope<'borrow, 'scope>,
-    ) -> Result<Local<'scope, Value>, TypeError> {
-        Ok(scope.new_number(self).into())
+    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(Number::new(scope, self).into())
     }
 }
 

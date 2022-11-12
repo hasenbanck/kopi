@@ -1,14 +1,17 @@
 use crate::{
     error::{create_type_error, TypeError},
     traits::FromValue,
-    value::{Local, Value, ValueScope},
+    value::{BigInt, Boolean, Int32, Integer, Number, Uint32, Value, ValueScope},
 };
 
 impl FromValue for () {
     type Value = ();
 
     #[inline(always)]
-    fn from_v8(_scope: &mut ValueScope, _value: Local<Value>) -> Result<Self::Value, TypeError> {
+    fn from_v8<'scope>(
+        _scope: &mut ValueScope<'scope>,
+        _value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
         Ok(())
     }
 }
@@ -17,9 +20,12 @@ impl FromValue for bool {
     type Value = bool;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Boolean>::try_from(value) {
-            Ok(val.is_true())
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Boolean::try_from(value) {
+            Ok(val.value())
         } else {
             Err(create_type_error(
                 "Value can't be converted to an i8",
@@ -34,8 +40,11 @@ impl FromValue for String {
     type Value = String;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        Ok(scope.value_to_string(&value))
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        Ok(value.to_string_representation(scope))
     }
 }
 
@@ -43,21 +52,24 @@ impl FromValue for i8 {
     type Value = i8;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             let val = i8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             let val = i8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             let val = i8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.i64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_i64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an i8",
@@ -82,21 +94,24 @@ impl FromValue for i16 {
     type Value = i16;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             let val = i16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             let val = i16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             let val = i16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.i64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_i64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an i16",
@@ -121,19 +136,22 @@ impl FromValue for i32 {
     type Value = i32;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             let val = i32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i32", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             Ok(val.value())
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             let val = i32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i32", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.i64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_i64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an i32",
@@ -158,11 +176,14 @@ impl FromValue for i64 {
     type Value = i64;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             Ok(val.value())
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.i64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_i64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an i64",
@@ -171,10 +192,10 @@ impl FromValue for i64 {
                 ));
             }
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             let val = i64::from(val.value());
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             let val = i64::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i64", scope, &value))?;
             Ok(val)
@@ -192,21 +213,24 @@ impl FromValue for u8 {
     type Value = u8;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             let val = u8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             let val = u8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             let val = u8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.u64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_u64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an u8",
@@ -231,21 +255,24 @@ impl FromValue for u16 {
     type Value = u16;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             let val = u16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             let val = u16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             let val = u16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.u64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_u64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an u16",
@@ -270,19 +297,22 @@ impl FromValue for u32 {
     type Value = u32;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             let val = u32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u32", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             Ok(val.value())
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             let val = u32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u32", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.u64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_u64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an u32",
@@ -307,13 +337,16 @@ impl FromValue for u64 {
     type Value = u64;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        if let Ok(val) = v8::Local::<v8::Integer>::try_from(value) {
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        if let Ok(val) = Integer::try_from(value) {
             let val = u64::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u64", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::BigInt>::try_from(value) {
-            let (val, lossless) = val.u64_value();
+        } else if let Ok(val) = BigInt::try_from(value) {
+            let (val, lossless) = val.value_u64();
             if !lossless {
                 return Err(create_type_error(
                     "Value not in range for an u64",
@@ -322,11 +355,11 @@ impl FromValue for u64 {
                 ));
             }
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Uint32>::try_from(value) {
+        } else if let Ok(val) = Uint32::try_from(value) {
             let val = u64::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u64", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = v8::Local::<v8::Int32>::try_from(value) {
+        } else if let Ok(val) = Int32::try_from(value) {
             let val = u64::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u64", scope, &value))?;
             Ok(val)
@@ -344,8 +377,11 @@ impl FromValue for f32 {
     type Value = f32;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        let value = v8::Local::<v8::Number>::try_from(value)
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        let value = Number::try_from(value)
             .map_err(|_| create_type_error("Value not a f32", scope, &value))?;
         Ok(value.value() as f32)
     }
@@ -355,8 +391,11 @@ impl FromValue for f64 {
     type Value = f64;
 
     #[inline(always)]
-    fn from_v8(scope: &mut ValueScope, value: Local<Value>) -> Result<Self::Value, TypeError> {
-        let value = v8::Local::<v8::Number>::try_from(value)
+    fn from_v8<'scope>(
+        scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self::Value, TypeError> {
+        let value = Number::try_from(value)
             .map_err(|_| create_type_error("Value not a f64", scope, &value))?;
         Ok(value.value())
     }

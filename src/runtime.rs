@@ -2,6 +2,8 @@
 
 use std::{any::Any, cell::RefCell, ffi::c_void, rc::Rc, sync::Arc};
 
+use v8::NewStringType;
+
 // Needs to be public for the `static_function` macro.
 /// Slot inside the runtime in which we safe a Rc<RefCell<S>> to the state S.
 #[doc(hidden)]
@@ -11,7 +13,7 @@ use crate::{
     error::{create_error_from_exception, Error},
     extension::FunctionDeclaration,
     traits::FromValue,
-    value::{create_string, ValueScope},
+    value::{new_string, Seal},
     Extension, V8_INITIALIZATION,
 };
 
@@ -88,7 +90,8 @@ impl<STATE> Runtime<STATE> {
                 .filter(|e| e.namespace.is_none())
             {
                 for (function_name, function_declaration) in declarations.drain() {
-                    let function_name = create_string(isolate_scope, function_name);
+                    let function_name =
+                        new_string(isolate_scope, function_name, NewStringType::Normal);
 
                     let function = match function_declaration {
                         FunctionDeclaration::Closure {
@@ -136,11 +139,13 @@ impl<STATE> Runtime<STATE> {
                 .filter(|e| e.namespace.is_some())
             {
                 if let Some(namespace) = namespace {
-                    let namespace_name = create_string(global_context_scope, namespace);
+                    let namespace_name =
+                        new_string(global_context_scope, namespace, NewStringType::Normal);
                     let namespace_object = v8::Object::new(global_context_scope);
 
                     for (function_name, function_declaration) in declarations.drain() {
-                        let function_name = create_string(global_context_scope, function_name);
+                        let function_name =
+                            new_string(global_context_scope, function_name, NewStringType::Normal);
 
                         let function = match function_declaration {
                             FunctionDeclaration::Closure {
@@ -218,7 +223,7 @@ impl<STATE> Runtime<STATE> {
         let source = source.as_ref();
 
         let scope = &mut v8::HandleScope::with_context(&mut self.isolate, &self.main_context);
-        let source = create_string(scope, source);
+        let source = new_string(scope, source, NewStringType::Normal);
 
         let try_catch_scope = &mut v8::TryCatch::new(scope);
 
@@ -232,8 +237,7 @@ impl<STATE> Runtime<STATE> {
             return create_error_from_exception(try_catch_scope, exception);
         };
 
-        let mut scope = ValueScope(try_catch_scope);
-        T::from_v8(&mut scope, v8_value).map_err(Error::Type)
+        T::from_v8(try_catch_scope.seal(), v8_value.seal()).map_err(Error::Type)
     }
 }
 

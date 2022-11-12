@@ -9,6 +9,7 @@ mod integer;
 mod map;
 mod number;
 mod primitive;
+mod set;
 mod stack_trace;
 mod string;
 mod uint32;
@@ -18,9 +19,9 @@ pub(crate) use string::new_string;
 pub use v8::{
     ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data,
     DataView, Date, FixedArray, Float32Array, Float64Array, Function, Int16Array, Int32Array,
-    Int8Array, Message, Name, Object, PrimitiveArray, Promise, Proxy, RegExp, Set,
-    SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array, Uint32Array,
-    Uint8Array, Uint8ClampedArray,
+    Int8Array, Message, Name, Object, PrimitiveArray, Promise, Proxy, RegExp, SharedArrayBuffer,
+    StringObject, Symbol, SymbolObject, TypedArray, Uint16Array, Uint32Array, Uint8Array,
+    Uint8ClampedArray,
 };
 
 pub use self::{
@@ -33,6 +34,7 @@ pub use self::{
     map::Map,
     number::Number,
     primitive::Primitive,
+    set::Set,
     stack_trace::{StackFrame, StackTrace},
     string::{NewStringType, String},
     uint32::Uint32,

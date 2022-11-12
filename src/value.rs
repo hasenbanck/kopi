@@ -1,5 +1,6 @@
 //! Values used inside the ECMAScript engine.
 
+mod array;
 mod bigint;
 mod boolean;
 mod error;
@@ -15,14 +16,15 @@ mod uint32;
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
-    Array, ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array,
-    BooleanObject, Data, DataView, Date, FixedArray, Float32Array, Float64Array, Function,
-    Int16Array, Int32Array, Int8Array, Message, Name, Object, PrimitiveArray, Promise, Proxy,
-    RegExp, Set, SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array,
-    Uint32Array, Uint8Array, Uint8ClampedArray,
+    ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data,
+    DataView, Date, FixedArray, Float32Array, Float64Array, Function, Int16Array, Int32Array,
+    Int8Array, Message, Name, Object, PrimitiveArray, Promise, Proxy, RegExp, Set,
+    SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array, Uint32Array,
+    Uint8Array, Uint8ClampedArray,
 };
 
 pub use self::{
+    array::Array,
     bigint::BigInt,
     boolean::Boolean,
     error::Error,
@@ -128,9 +130,10 @@ impl<'scope> Value<'scope> {
 #[cfg(test)]
 mod test {
     use super::ValueScope;
+    use crate::value::Value;
 
     #[test]
-    fn scope_transmute_safety() {
+    fn transparent_representation_value_scope_() {
         // Make sure that both types are of the same size and alignment.
         assert_eq!(
             std::mem::size_of::<ValueScope>(),
@@ -142,5 +145,20 @@ mod test {
         );
         // Make sure that we don't have a ZST.
         assert_ne!(std::mem::size_of::<ValueScope>(), 0);
+    }
+
+    #[test]
+    fn transparent_representation_value() {
+        // Make sure that both types are of the same size and alignment.
+        assert_eq!(
+            std::mem::size_of::<Value>(),
+            std::mem::size_of::<v8::Local<'_, v8::Value>>()
+        );
+        assert_eq!(
+            std::mem::align_of::<Value>(),
+            std::mem::align_of::<v8::Local<'_, v8::Value>>()
+        );
+        // Make sure that we don't have a ZST.
+        assert_ne!(std::mem::size_of::<Value>(), 0);
     }
 }

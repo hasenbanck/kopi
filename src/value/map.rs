@@ -1,4 +1,5 @@
 use super::{Seal, Unseal, Value, ValueScope};
+use crate::value::Array;
 
 /// A map value.
 #[derive(Copy, Clone)]
@@ -49,6 +50,12 @@ impl<'scope> Map<'scope> {
         self.0.size()
     }
 
+    /// Returns `true` if the map is empty.
+    #[inline(always)]
+    pub fn is_empty(&self) -> bool {
+        self.0.size() == 0
+    }
+
     /// Clears the map.
     #[inline(always)]
     pub fn clear(&self) {
@@ -63,7 +70,7 @@ impl<'scope> Map<'scope> {
 
     /// Either updates or inserts the value at the given key.
     #[inline(always)]
-    pub fn insert(&self, scope: &mut ValueScope<'scope>, key: Value<'scope>, value: Value<'scope>) {
+    pub fn set(&self, scope: &mut ValueScope<'scope>, key: Value<'scope>, value: Value<'scope>) {
         let _ = self.0.set(scope.unseal(), key.unseal(), value.unseal());
     }
 
@@ -87,7 +94,7 @@ impl<'scope> Map<'scope> {
     /// key0, value0, key1, value1...
     /// ```
     #[inline(always)]
-    pub fn to_array(&self, scope: &mut ValueScope<'scope>) -> v8::Local<'scope, v8::Array> {
-        self.0.as_array(scope.unseal())
+    pub fn to_array(&self, scope: &mut ValueScope<'scope>) -> Array<'scope> {
+        self.0.as_array(scope.unseal()).seal()
     }
 }

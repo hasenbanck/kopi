@@ -5,7 +5,7 @@ use std::{any::Any, cell::RefCell, ffi::c_void, rc::Rc, sync::Arc};
 use v8::NewStringType;
 
 // Needs to be public for the `static_function` macro.
-/// Slot inside the runtime in which we safe a Rc<RefCell<S>> to the state S.
+/// Slot inside the runtime in which we safe a `Rc<RefCell<S>>` to the state `S`.
 #[doc(hidden)]
 pub const STATE_DATA_SLOT: u32 = 0;
 
@@ -14,7 +14,7 @@ use crate::{
     extension::FunctionDeclaration,
     traits::FromValue,
     value::{new_string, Seal},
-    Extension, V8_INITIALIZATION,
+    Extension, HeapStatistics, V8_INITIALIZATION,
 };
 
 /// Configures a ECMAScript runtime.
@@ -239,6 +239,11 @@ impl<STATE> Runtime<STATE> {
 
         T::from_v8(try_catch_scope.seal(), v8_value.seal()).map_err(Error::Type)
     }
+
+    /// Returns a collection of information about the heap of the engine.
+    pub fn heap_statistics(&mut self) -> HeapStatistics {
+        HeapStatistics::new(&mut self.isolate)
+    }
 }
 
 #[cfg(test)]
@@ -287,6 +292,30 @@ mod test {
 
         handle0.join().expect("thread 0 died").expect("error found");
         handle1.join().expect("thread 1 died").expect("error found");
+    }
+
+    #[test]
+    fn heap_statistics() {
+        const MAX_HEAP_SIZE: usize = 5 * 1024 * 1024;
+
+        initialize_v8(InitializationOptions::default());
+
+        let mut runtime = Runtime::new(
+            RuntimeOptions {
+                max_heap_size: MAX_HEAP_SIZE,
+                ..Default::default()
+            },
+            (),
+        )
+        .expect("Can't not create runtime");
+
+        let heap_statistics = runtime.heap_statistics();
+
+        // This only tests if the values make some sense.
+        assert!(heap_statistics.heap_size_limit() >= MAX_HEAP_SIZE);
+        assert!(heap_statistics.total_heap_size() >= 64 * 1024);
+        assert!(heap_statistics.used_heap_size() >= 64 * 1024);
+        assert!(heap_statistics.total_physical_size() >= 64 * 1024);
     }
 
     #[test]

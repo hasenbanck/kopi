@@ -64,6 +64,7 @@ pub mod _macros {
 
 pub mod error;
 mod extension;
+mod heap_statistics;
 mod runtime;
 mod serialization;
 mod traits;
@@ -77,12 +78,15 @@ use std::{
     num::NonZeroU32,
 };
 
-pub use extension::{
-    Extension, FastcallFunction, FunctionArguments, FunctionWithStateArguments, StaticFunction,
+pub use self::{
+    extension::{
+        Extension, FastcallFunction, FunctionArguments, FunctionWithStateArguments, StaticFunction,
+    },
+    heap_statistics::HeapStatistics,
+    runtime::{Runtime, RuntimeOptions},
+    serialization::*,
+    traits::{FastcallArgument, FastcallReturnValue, FromValue, IntoValue},
 };
-pub use runtime::{Runtime, RuntimeOptions};
-pub use serialization::*;
-pub use traits::{FastcallArgument, FastcallReturnValue, FromValue, IntoValue};
 
 const DEFAULT_V8_FLAGS: &str = "--turbo_fast_api_calls";
 

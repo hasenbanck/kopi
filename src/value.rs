@@ -1,4 +1,7 @@
-//! Values used inside the ECMAScript engine.
+//! Values that the engine uses.
+//!
+//! The API is optimized to be used in the [`FromValue`] and [`ToValue`] traits for serialization
+//! and deserialization.
 
 mod array;
 mod bigint;
@@ -8,6 +11,7 @@ mod int32;
 mod integer;
 mod map;
 mod number;
+mod object;
 mod primitive;
 mod set;
 mod stack_trace;
@@ -18,10 +22,10 @@ pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
     ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data,
-    DataView, Date, FixedArray, Float32Array, Float64Array, Function, Int16Array, Int32Array,
-    Int8Array, Message, Name, Object, PrimitiveArray, Promise, Proxy, RegExp, SharedArrayBuffer,
-    StringObject, Symbol, SymbolObject, TypedArray, Uint16Array, Uint32Array, Uint8Array,
-    Uint8ClampedArray,
+    DataView, Date, External, FixedArray, Float32Array, Float64Array, Function, Int16Array,
+    Int32Array, Int8Array, Message, Name, NumberObject, PrimitiveArray, Promise, PromiseResolver,
+    Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array,
+    Uint32Array, Uint8Array, Uint8ClampedArray, WasmMemoryObject, WasmModuleObject,
 };
 
 pub use self::{
@@ -33,6 +37,7 @@ pub use self::{
     integer::Integer,
     map::Map,
     number::Number,
+    object::Object,
     primitive::Primitive,
     set::Set,
     stack_trace::{StackFrame, StackTrace},
@@ -104,16 +109,22 @@ impl<'scope> Value<'scope> {
         Value(value)
     }
 
-    /// Returns true if the value is null.
+    /// Returns `true` if the value is null.
     #[inline(always)]
     pub fn is_null(&self) -> bool {
         self.0.is_null()
     }
 
-    /// Returns true if the value is undefined.
+    /// Returns `true` if the value is undefined.
     #[inline(always)]
     pub fn is_undefined(&self) -> bool {
         self.0.is_undefined()
+    }
+
+    /// Returns `true` if the value is null or undefined.
+    #[inline(always)]
+    pub fn is_null_or_undefined(&self) -> bool {
+        self.0.is_null_or_undefined()
     }
 
     /// Returns the string representation of the value.

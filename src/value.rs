@@ -5,6 +5,7 @@ mod boolean;
 mod error;
 mod int32;
 mod integer;
+mod map;
 mod number;
 mod primitive;
 mod stack_trace;
@@ -16,7 +17,7 @@ pub(crate) use string::new_string;
 pub use v8::{
     Array, ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array,
     BooleanObject, Data, DataView, Date, FixedArray, Float32Array, Float64Array, Function,
-    Int16Array, Int32Array, Int8Array, Map, Message, Name, Object, PrimitiveArray, Promise, Proxy,
+    Int16Array, Int32Array, Int8Array, Message, Name, Object, PrimitiveArray, Promise, Proxy,
     RegExp, Set, SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array,
     Uint32Array, Uint8Array, Uint8ClampedArray,
 };
@@ -27,6 +28,7 @@ pub use self::{
     error::Error,
     int32::Int32,
     integer::Integer,
+    map::Map,
     number::Number,
     primitive::Primitive,
     stack_trace::{StackFrame, StackTrace},

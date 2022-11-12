@@ -98,7 +98,7 @@ impl<'scope> StackFrame<'scope> {
     /// Returns the name of the resource that contains the script for the function
     /// for this stack frame.
     #[inline(always)]
-    pub fn script_name<'s>(&self, scope: &mut ValueScope<'scope>) -> Option<String<'scope>> {
+    pub fn script_name(&self, scope: &mut ValueScope<'scope>) -> Option<String<'scope>> {
         self.0.get_script_name(scope.unseal()).map(|s| s.seal())
     }
 

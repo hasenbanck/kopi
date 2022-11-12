@@ -32,7 +32,7 @@ impl<'scope> TryFrom<Value<'scope>> for BigInt<'scope> {
     #[inline(always)]
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::BigInt>::try_from(value.0)?;
-        Ok(Self(inner.into()))
+        Ok(Self(inner))
     }
 }
 

@@ -37,7 +37,7 @@ impl<'scope> TryFrom<Value<'scope>> for String<'scope> {
     #[inline(always)]
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::String>::try_from(value.0)?;
-        Ok(Self(inner.into()))
+        Ok(Self(inner))
     }
 }
 

@@ -1,9 +1,9 @@
-use super::{Seal, Unseal, Value};
+use super::{Integer, Seal, Unseal, Value};
 
 /// A uint32 value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct Uint32<'scope>(v8::Local<'scope, v8::Uint32>);
+pub struct Uint32<'scope>(pub(crate) v8::Local<'scope, v8::Uint32>);
 
 impl<'scope> Seal<Uint32<'scope>> for v8::Local<'scope, v8::Uint32> {
     #[inline(always)]
@@ -22,7 +22,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Uint32>> for Uint32<'scope> {
 impl<'scope> From<Uint32<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: Uint32<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for Uint32<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Uint32>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Uint32<'scope>> for Integer<'scope> {
+    #[inline(always)]
+    fn from(value: Uint32<'scope>) -> Self {
+        Integer(value.0.into())
     }
 }
 

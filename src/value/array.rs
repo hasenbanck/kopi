@@ -3,7 +3,7 @@ use super::{Seal, Unseal, Value, ValueScope};
 /// A array value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct Array<'scope>(v8::Local<'scope, v8::Array>);
+pub struct Array<'scope>(pub(crate) v8::Local<'scope, v8::Array>);
 
 impl<'scope> Seal<Array<'scope>> for v8::Local<'scope, v8::Array> {
     #[inline(always)]
@@ -22,7 +22,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Array>> for Array<'scope> {
 impl<'scope> From<Array<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: Array<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 

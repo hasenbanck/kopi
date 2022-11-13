@@ -2,10 +2,8 @@
 
 use std::{any::Any, cell::RefCell, ffi::c_void, rc::Rc, sync::Arc};
 
-use v8::NewStringType;
-
 // Needs to be public for the `static_function` macro.
-/// Slot inside the runtime in which we safe a `Rc<RefCell<S>>` to the state `S`.
+/// Slot inside the runtime in which we save a `Rc<RefCell<S>>` to the state `S`.
 #[doc(hidden)]
 pub const STATE_DATA_SLOT: u32 = 0;
 
@@ -13,7 +11,7 @@ use crate::{
     error::{create_error_from_exception, Error},
     extension::FunctionDeclaration,
     traits::FromValue,
-    value::{new_string, Seal},
+    value::{new_string, NewStringType, Seal},
     Extension, HeapStatistics, V8_INITIALIZATION,
 };
 
@@ -30,7 +28,7 @@ pub struct RuntimeOptions<STATE> {
 impl<STATE> Default for RuntimeOptions<STATE> {
     fn default() -> Self {
         Self {
-            initial_heap_size: 32 * 1024,     // 32 KiB
+            initial_heap_size: 512 * 1024,    // 512 KiB
             max_heap_size: 512 * 1024 * 1024, // 512 MiB
             extensions: vec![],
         }

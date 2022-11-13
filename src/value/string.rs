@@ -1,6 +1,6 @@
 pub use v8::NewStringType;
 
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{Name, Seal, Unseal, Value, ValueScope};
 
 static MAX_STRING_SIZE: once_cell::sync::Lazy<usize> =
     once_cell::sync::Lazy::new(v8::String::max_length);
@@ -8,7 +8,7 @@ static MAX_STRING_SIZE: once_cell::sync::Lazy<usize> =
 /// A string value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct String<'scope>(v8::Local<'scope, v8::String>);
+pub struct String<'scope>(pub(crate) v8::Local<'scope, v8::String>);
 
 impl<'scope> Seal<String<'scope>> for v8::Local<'scope, v8::String> {
     #[inline(always)]
@@ -27,7 +27,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::String>> for String<'scope> {
 impl<'scope> From<String<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: String<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 
@@ -41,6 +41,13 @@ impl<'scope> TryFrom<Value<'scope>> for String<'scope> {
     }
 }
 
+impl<'scope> From<String<'scope>> for Name<'scope> {
+    #[inline(always)]
+    fn from(value: String<'scope>) -> Self {
+        Name(value.0.into())
+    }
+}
+
 impl<'scope> String<'scope> {
     /// Creates a new string. Will truncate string if they are too long.
     pub fn new<S: AsRef<str>>(
@@ -51,7 +58,7 @@ impl<'scope> String<'scope> {
         let data = string.as_ref().as_bytes();
         let max_length = usize::min(*MAX_STRING_SIZE, data.len());
 
-        v8::String::new_from_utf8(scope.unseal(), &data[..max_length], string_type)
+        v8::String::new_from_utf8(scope.unseal(), &data[..max_length], string_type.into())
             .expect("String is too large for V8")
             .seal()
     }
@@ -81,6 +88,6 @@ pub(crate) fn new_string<'scope, S: AsRef<str>>(
 ) -> v8::Local<'scope, v8::String> {
     let data = string.as_ref().as_bytes();
     let max_length = usize::min(*MAX_STRING_SIZE, data.len());
-    v8::String::new_from_utf8(scope, &data[..max_length], string_type)
+    v8::String::new_from_utf8(scope, &data[..max_length], string_type.into())
         .expect("String is too large for V8")
 }

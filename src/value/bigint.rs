@@ -1,9 +1,9 @@
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{Primitive, Seal, Unseal, Value, ValueScope};
 
 /// A big int value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct BigInt<'scope>(v8::Local<'scope, v8::BigInt>);
+pub struct BigInt<'scope>(pub(crate) v8::Local<'scope, v8::BigInt>);
 
 impl<'scope> Seal<BigInt<'scope>> for v8::Local<'scope, v8::BigInt> {
     #[inline(always)]
@@ -22,7 +22,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::BigInt>> for BigInt<'scope> {
 impl<'scope> From<BigInt<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: BigInt<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for BigInt<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::BigInt>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<BigInt<'scope>> for Primitive<'scope> {
+    #[inline(always)]
+    fn from(value: BigInt<'scope>) -> Self {
+        Primitive(value.0.into())
     }
 }
 

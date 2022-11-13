@@ -1,9 +1,9 @@
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{Primitive, Seal, Unseal, Value, ValueScope};
 
 /// A number value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct Number<'scope>(v8::Local<'scope, v8::Number>);
+pub struct Number<'scope>(pub(crate) v8::Local<'scope, v8::Number>);
 
 impl<'scope> Seal<Number<'scope>> for v8::Local<'scope, v8::Number> {
     #[inline(always)]
@@ -22,7 +22,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Number>> for Number<'scope> {
 impl<'scope> From<Number<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: Number<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for Number<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Number>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Number<'scope>> for Primitive<'scope> {
+    #[inline(always)]
+    fn from(value: Number<'scope>) -> Self {
+        Primitive(value.0.into())
     }
 }
 

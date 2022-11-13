@@ -7,12 +7,10 @@ use std::{
     sync::Arc,
 };
 
-use v8::NewStringType;
-
 use crate::{
     runtime::STATE_DATA_SLOT,
     traits::{FromValue, IntoValue},
-    value::{self, Seal, Unseal},
+    value::{self, NewStringType, Seal, Unseal},
 };
 
 /// Traits for static functions, which can be called faster than closures.

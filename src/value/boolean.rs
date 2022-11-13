@@ -1,9 +1,9 @@
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{Primitive, Seal, Unseal, Value, ValueScope};
 
 /// A boolean value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct Boolean<'scope>(v8::Local<'scope, v8::Boolean>);
+pub struct Boolean<'scope>(pub(crate) v8::Local<'scope, v8::Boolean>);
 
 impl<'scope> Seal<Boolean<'scope>> for v8::Local<'scope, v8::Boolean> {
     #[inline(always)]
@@ -22,7 +22,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Boolean>> for Boolean<'scope> {
 impl<'scope> From<Boolean<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: Boolean<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for Boolean<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Boolean>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Boolean<'scope>> for Primitive<'scope> {
+    #[inline(always)]
+    fn from(value: Boolean<'scope>) -> Self {
+        Primitive(value.0.into())
     }
 }
 

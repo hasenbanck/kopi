@@ -10,6 +10,7 @@ mod error;
 mod int32;
 mod integer;
 mod map;
+mod name;
 mod number;
 mod object;
 mod primitive;
@@ -23,8 +24,8 @@ pub(crate) use string::new_string;
 pub use v8::{
     ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data,
     DataView, Date, External, FixedArray, Float32Array, Float64Array, Function, Int16Array,
-    Int32Array, Int8Array, Message, Name, NumberObject, PrimitiveArray, Promise, PromiseResolver,
-    Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array,
+    Int32Array, Int8Array, Message, NumberObject, PrimitiveArray, Promise, PromiseResolver, Proxy,
+    RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array,
     Uint32Array, Uint8Array, Uint8ClampedArray, WasmMemoryObject, WasmModuleObject,
 };
 
@@ -36,6 +37,7 @@ pub use self::{
     int32::Int32,
     integer::Integer,
     map::Map,
+    name::Name,
     number::Number,
     object::Object,
     primitive::Primitive,
@@ -103,12 +105,6 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Value>> for Value<'scope> {
 }
 
 impl<'scope> Value<'scope> {
-    /// Creates a new value.
-    #[inline(always)]
-    pub fn new(value: v8::Local<'scope, v8::Value>) -> Value<'scope> {
-        Value(value)
-    }
-
     /// Returns `true` if the value is null.
     #[inline(always)]
     pub fn is_null(&self) -> bool {

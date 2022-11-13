@@ -4,7 +4,7 @@ use crate::value::Array;
 /// A map value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct Map<'scope>(v8::Local<'scope, v8::Map>);
+pub struct Map<'scope>(pub(crate) v8::Local<'scope, v8::Map>);
 
 impl<'scope> Seal<Map<'scope>> for v8::Local<'scope, v8::Map> {
     #[inline(always)]
@@ -23,7 +23,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Map>> for Map<'scope> {
 impl<'scope> From<Map<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: Map<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 

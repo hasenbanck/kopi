@@ -3,7 +3,7 @@ use super::{Seal, Unseal, Value};
 /// A set value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct Set<'scope>(v8::Local<'scope, v8::Set>);
+pub struct Set<'scope>(pub(crate) v8::Local<'scope, v8::Set>);
 
 impl<'scope> Seal<Set<'scope>> for v8::Local<'scope, v8::Set> {
     #[inline(always)]
@@ -22,7 +22,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Set>> for Set<'scope> {
 impl<'scope> From<Set<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: Set<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 

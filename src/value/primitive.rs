@@ -3,7 +3,7 @@ use super::{Seal, Unseal, Value, ValueScope};
 /// The superclass of primitive values.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct Primitive<'scope>(v8::Local<'scope, v8::Primitive>);
+pub struct Primitive<'scope>(pub(crate) v8::Local<'scope, v8::Primitive>);
 
 impl<'scope> Seal<Primitive<'scope>> for v8::Local<'scope, v8::Primitive> {
     #[inline(always)]
@@ -22,7 +22,7 @@ impl<'scope> Unseal<v8::Local<'scope, v8::Primitive>> for Primitive<'scope> {
 impl<'scope> From<Primitive<'scope>> for Value<'scope> {
     #[inline(always)]
     fn from(value: Primitive<'scope>) -> Self {
-        Value::new(value.0.into())
+        Value(value.0.into())
     }
 }
 

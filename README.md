@@ -78,6 +78,14 @@ Sooner than later following functionality will be added:
 
 We're not yet totally sure how the API for async should look. 
 
+## Documentation
+
+The local documentation can be generated with:
+
+```sh
+RUSTDOCFLAGS="--cfg docsrs" cargo +nightly doc --all-features
+```
+
 ## License
 
 Licensed under either of

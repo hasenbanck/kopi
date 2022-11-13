@@ -13,7 +13,7 @@
 //!     }
 //! }
 //!
-//! initialize_v8(InitializationOptions::default());
+//! initialize_with_defaults();
 //!
 //! let mut extension = Extension::new(None);
 //! extension.add_function("madd", move |(a, b, c): (f32, f32, f32)| a + (b * c));
@@ -41,6 +41,7 @@
 #![deny(missing_docs)]
 #![deny(clippy::missing_safety_doc)]
 #![deny(clippy::unwrap_used)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod macros;
 
@@ -194,14 +195,28 @@ pub enum ExecutionModel {
     MultiThreaded(Option<NonZeroU32>),
 }
 
-/// Initialized the V8 engine. Needs to be called once before creating a runtime.
+/// Initialized the V8 engine with the default configuration.
 ///
-/// Subsequent calls will result in a NOP.
+/// `initialize()` or `initialize_with_defaults` Need to be called once before creating
+/// a runtime. Subsequent calls will result in a NOP.
 ///
 /// # Panics
 ///
 /// Panics if the V8 engine could not be initialized.
-pub fn initialize_v8(options: InitializationOptions) {
+pub fn initialize_with_defaults() {
+    let options = InitializationOptions::default();
+    initialize(options);
+}
+
+/// Initialized the V8 engine.
+///
+/// `initialize()` or `initialize_with_defaults` Need to be called once before creating
+/// a runtime. Subsequent calls will result in a NOP.
+///
+/// # Panics
+///
+/// Panics if the V8 engine could not be initialized.
+pub fn initialize(options: InitializationOptions) {
     V8_INITIALIZATION.call_once(|| {
         let (flags, platform) = match options.execution_model {
             ExecutionModel::SingleThreaded => {
@@ -300,7 +315,7 @@ pub fn prepare_icu_data<D: AsRef<[u8]>>(data: D) -> Option<&'static [Aligned16]>
 
 #[cfg(test)]
 mod test {
-    use crate::{initialize_v8, version_v8, InitializationOptions, Runtime, RuntimeOptions};
+    use crate::{initialize_with_defaults, version_v8, Runtime, RuntimeOptions};
 
     #[test]
     fn test_version_v8() {
@@ -311,7 +326,7 @@ mod test {
     // For this test to run we need an ICU file in the root folder.
     #[test]
     fn test_icu() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let mut runtime =
             Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");

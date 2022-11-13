@@ -111,8 +111,8 @@ impl IntoValue for f64 {
 mod test {
     use super::{MAX_SAFE_INTEGER, MIN_SAFE_INTEGER};
     use crate::{
-        initialize_v8, traits::IntoValue, Extension, FunctionArguments, InitializationOptions,
-        Runtime, RuntimeOptions,
+        initialize_with_defaults, traits::IntoValue, Extension, FunctionArguments, Runtime,
+        RuntimeOptions,
     };
 
     pub fn test<F, A, R>(expected_type: &str, expected_value: &str, function: F)
@@ -121,7 +121,7 @@ mod test {
         A: FunctionArguments<F, R>,
         R: IntoValue,
     {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let mut extension = Extension::new(None);
         extension.add_function("test", function);
 

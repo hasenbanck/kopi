@@ -3,27 +3,28 @@ use serde::{Deserialize, Serialize};
 use crate::{
     error::TypeError,
     value::{Value, ValueScope},
-    FromValue, IntoValue,
 };
 
-impl<T> FromValue for T
+/// Converts a ECMAScript value to a deserializable type.
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub fn deserialize_value<'scope, T>(
+    _scope: &mut ValueScope<'scope>,
+    _value: Value<'scope>,
+) -> Result<T, TypeError>
+where
+    T: Deserialize<'scope>,
+{
+    todo!()
+}
+
+/// Converts a serializable type to a ECMAScript value.
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub fn serialize_value<'scope, T>(
+    _scope: &mut ValueScope<'scope>,
+    _value: T,
+) -> Result<Value<'scope>, TypeError>
 where
     T: Serialize,
 {
-    type Value = T;
-
-    // TODO Implement serde deserialization, since serde_v8 does not cut it.
-    fn from_v8(_scope: &mut ValueScope, _value: Value) -> Result<Self::Value, TypeError> {
-        todo!()
-    }
-}
-
-impl<'de, T> IntoValue for T
-where
-    T: Deserialize<'de>,
-{
-    // TODO Implement serde serialization, since serde_v8 does not cut it.
-    fn into_v8<'scope>(self, _scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
-        todo!()
-    }
+    todo!()
 }

@@ -57,7 +57,7 @@ impl<STATE> Drop for Runtime<STATE> {
 impl<STATE> Runtime<STATE> {
     /// Creates a new [`Runtime`] with the given state.
     ///
-    /// [`crate::initialize_v8()`] must be called before instantiating a [`Runtime`].
+    /// [`crate::initialize()`] must be called before instantiating a [`Runtime`].
     pub fn new(mut options: RuntimeOptions<STATE>, state: STATE) -> Result<Self, Error> {
         if !V8_INITIALIZATION.is_completed() {
             return Err(Error::V8NotInitialized);
@@ -262,7 +262,7 @@ mod test {
 
     #[test]
     fn runtime_creation() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         // Multiple runtimes can be created.
         let runtime0 = Runtime::new(RuntimeOptions::default(), ());
@@ -274,7 +274,7 @@ mod test {
 
     #[test]
     fn runtime_creation_multiple_thread() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let handle0: JoinHandle<Result<(), Error>> = std::thread::spawn(|| {
             let mut runtime0 = Runtime::new(RuntimeOptions::default(), ())?;
@@ -298,7 +298,7 @@ mod test {
     fn heap_statistics() {
         const MAX_HEAP_SIZE: usize = 5 * 1024 * 1024;
 
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let mut runtime = Runtime::new(
             RuntimeOptions {
@@ -320,7 +320,7 @@ mod test {
 
     #[test]
     fn execute_code() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let mut runtime =
             Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
@@ -331,7 +331,7 @@ mod test {
 
     #[test]
     fn execute_code_is_stateful() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let mut runtime =
             Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
@@ -344,7 +344,7 @@ mod test {
 
     #[test]
     fn execute_code_compile_error() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let mut runtime =
             Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
@@ -355,7 +355,7 @@ mod test {
 
     #[test]
     fn execute_code_execution_error() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let mut runtime =
             Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
@@ -366,7 +366,7 @@ mod test {
 
     #[test]
     fn execute_code_simple_functions() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let counter = Arc::new(AtomicI32::new(42));
         let thread_counter1 = counter.clone();
@@ -406,7 +406,7 @@ mod test {
 
     #[test]
     fn global_functions_are_global() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let counter = Arc::new(AtomicI32::new(10));
         let thread_counter1 = counter.clone();
@@ -437,7 +437,7 @@ mod test {
 
     #[test]
     fn execute_code_simple_function_with_state() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         struct State(i32);
         let state = State(55);
@@ -472,7 +472,7 @@ mod test {
 
     #[test]
     fn execute_code_static() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let mut test_extension = Extension::new(Some("test"));
         test_extension.add_static_function("sub", sub);
@@ -502,7 +502,7 @@ mod test {
 
     #[test]
     fn execute_code_static_with_state() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let state = Rc::new(RefCell::new(50i32));
         let runtime_state = state.clone();
@@ -534,7 +534,7 @@ mod test {
 
     #[test]
     fn execute_code_fastcall() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let mut test_extension = Extension::new(Some("test"));
         test_extension.add_fastcall_function("add", add);
@@ -564,7 +564,7 @@ mod test {
 
     #[test]
     fn execute_code_fastcall_with_state() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
 
         let state = Rc::new(RefCell::new(99i32));
         let runtime_state = state.clone();

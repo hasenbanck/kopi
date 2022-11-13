@@ -405,7 +405,7 @@ impl FromValue for f64 {
 mod test {
     use std::fmt::Debug;
 
-    use crate::{initialize_v8, traits::FromValue, InitializationOptions, Runtime, RuntimeOptions};
+    use crate::{initialize_with_defaults, traits::FromValue, Runtime, RuntimeOptions};
 
     fn test_from<STATE, SOURCE, T>(runtime: &mut Runtime<STATE>, source: SOURCE, expected: T)
     where
@@ -434,7 +434,7 @@ mod test {
 
     #[test]
     fn from_value_for_unit() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let r = &mut Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
         test_from(r, "0", ());
@@ -443,7 +443,7 @@ mod test {
 
     #[test]
     fn from_value_for_bool() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let r = &mut Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
         test_from(r, "false", false);
@@ -452,7 +452,7 @@ mod test {
 
     #[test]
     fn from_value_for_string() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let r = &mut Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
         test_from(r, "'A string'", "A string".to_string());
@@ -462,7 +462,7 @@ mod test {
 
     #[test]
     fn from_value_for_integer() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let r = &mut Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
         test_from(r, i8::MIN.to_string(), i8::MIN);
@@ -490,7 +490,7 @@ mod test {
 
     #[test]
     fn from_value_for_float() {
-        initialize_v8(InitializationOptions::default());
+        initialize_with_defaults();
         let r = &mut Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
         test_f32(r, "0.0", 0.0f32);

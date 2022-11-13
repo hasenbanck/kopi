@@ -46,10 +46,10 @@ impl<'scope> Array<'scope> {
 
     /// Creates a new array from the given slice of values.
     #[inline(always)]
-    pub fn new_with_elements<E: AsRef<[Value<'scope>]>>(
-        scope: &mut ValueScope<'scope>,
-        elements: E,
-    ) -> Array<'scope> {
+    pub fn new_with_elements<E>(scope: &mut ValueScope<'scope>, elements: E) -> Array<'scope>
+    where
+        E: AsRef<[Value<'scope>]>,
+    {
         let elements = elements.as_ref();
 
         // SAFETY: This is safe, since Value wraps a v8::Local<v8::Value> transparently.

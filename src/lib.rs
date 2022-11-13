@@ -297,7 +297,10 @@ pub struct Aligned16([u8; 16]);
 /// Helper function to properly align the ICU data to 16 bytes.
 ///
 /// It will leak the data to give it the expected static lifetime.
-pub fn prepare_icu_data<D: AsRef<[u8]>>(data: D) -> Option<&'static [Aligned16]> {
+pub fn prepare_icu_data<D>(data: D) -> Option<&'static [Aligned16]>
+where
+    D: AsRef<[u8]>,
+{
     let data = data.as_ref();
     if data.len() % 16 != 0 {
         None

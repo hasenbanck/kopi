@@ -214,9 +214,10 @@ impl<STATE> Runtime<STATE> {
     // TODO add support for creating a new runtime from a snapshot
 
     /// Executes the ECMAScript as a classic script inside the runtime and returns the evaluated value.
-    pub fn execute<T, SOURCE: AsRef<str>>(&mut self, source: SOURCE) -> Result<T, Error>
+    pub fn execute<T, SOURCE>(&mut self, source: SOURCE) -> Result<T, Error>
     where
         T: FromValue<Value = T>,
+        SOURCE: AsRef<str>,
     {
         let source = source.as_ref();
 

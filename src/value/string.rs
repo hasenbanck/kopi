@@ -50,15 +50,18 @@ impl<'scope> From<String<'scope>> for Name<'scope> {
 
 impl<'scope> String<'scope> {
     /// Creates a new string. Will truncate string if they are too long.
-    pub fn new<S: AsRef<str>>(
+    pub fn new<S>(
         scope: &mut ValueScope<'scope>,
         string: S,
         string_type: NewStringType,
-    ) -> String<'scope> {
+    ) -> String<'scope>
+    where
+        S: AsRef<str>,
+    {
         let data = string.as_ref().as_bytes();
         let max_length = usize::min(*MAX_STRING_SIZE, data.len());
 
-        v8::String::new_from_utf8(scope.unseal(), &data[..max_length], string_type.into())
+        v8::String::new_from_utf8(scope.unseal(), &data[..max_length], string_type)
             .expect("String is too large for V8")
             .seal()
     }
@@ -81,13 +84,16 @@ impl<'scope> String<'scope> {
 }
 
 /// Utility function to create a new V8 string. Will truncate string if they are too long.
-pub(crate) fn new_string<'scope, S: AsRef<str>>(
+pub(crate) fn new_string<'scope, S>(
     scope: &mut v8::HandleScope<'scope, ()>,
     string: S,
     string_type: NewStringType,
-) -> v8::Local<'scope, v8::String> {
+) -> v8::Local<'scope, v8::String>
+where
+    S: AsRef<str>,
+{
     let data = string.as_ref().as_bytes();
     let max_length = usize::min(*MAX_STRING_SIZE, data.len());
-    v8::String::new_from_utf8(scope, &data[..max_length], string_type.into())
+    v8::String::new_from_utf8(scope, &data[..max_length], string_type)
         .expect("String is too large for V8")
 }

@@ -66,12 +66,15 @@ impl<'scope> BigInt<'scope> {
     ///
     /// Returns `None` if the value could not be created.
     #[inline(always)]
-    pub fn new_from_words<'s>(
+    pub fn new_from_words<W>(
         scope: &mut ValueScope<'scope>,
         sign_bit: bool,
-        words: &[u64],
-    ) -> Option<BigInt<'scope>> {
-        v8::BigInt::new_from_words(scope.unseal(), sign_bit, words).map(|v| v.seal())
+        words: &W,
+    ) -> Option<BigInt<'scope>>
+    where
+        W: AsRef<[u64]>,
+    {
+        v8::BigInt::new_from_words(scope.unseal(), sign_bit, words.as_ref()).map(|v| v.seal())
     }
 
     /// Returns the u64 value of the big int. The second return value signals if the conversion
@@ -100,7 +103,10 @@ impl<'scope> BigInt<'scope> {
     ///
     /// Use [`word_count`()] to get the required size.
     #[inline]
-    pub fn value_words<W: AsMut<[u64]>>(&self, mut words: W) -> bool {
+    pub fn value_words<W>(&self, mut words: W) -> bool
+    where
+        W: AsMut<[u64]>,
+    {
         let (sign, _) = self.0.to_words_array(words.as_mut());
         sign
     }

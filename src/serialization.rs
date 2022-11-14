@@ -1,9 +1,9 @@
 //! Implements the serialization / deserialization of ECMAScript values.
 
-mod from_value_impl;
-mod into_value_impl;
-pub use from_value_impl::*;
-pub use into_value_impl::*;
+mod deserialize_impl;
+mod serialize_impl;
+pub use deserialize_impl::*;
+pub use serialize_impl::*;
 
 #[cfg(feature = "serde")]
 mod serde;

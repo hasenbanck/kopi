@@ -4,10 +4,10 @@ use crate::{
     value::{Value, ValueScope},
 };
 
-/// Trait to convert a Rust value into a [`Value`] using a [`ValueBuilder`].
-pub trait IntoValue {
-    /// Needs to convert the given type to a [`Value`].
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError>;
+/// Trait to serialize a Rust value into a [`Value`].
+pub trait Serialize {
+    /// Needs to serialize the given type to a [`Value`].
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError>;
 
     /// Defines if the type is generally `undefined`. Most useful for the `()` type, where we don't
     /// want to set any return value at all. Standard implementation should be fine for most
@@ -18,17 +18,18 @@ pub trait IntoValue {
     }
 }
 
-/// Trait to convert a [`Value`] into a Rust value.
-pub trait FromValue {
-    /// The type of the target value.
-    type Value;
-
-    /// Needs to convert the given [`Local<Value>`] into the expected type.
-    fn from_v8<'scope>(
-        scope: &mut ValueScope<'scope>,
-        value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError>;
+/// Trait to deserialize a [`Value`] into a Rust value.
+pub trait Deserialize<'scope>: Sized {
+    /// Needs to convert the given [`Value`] into the expected type.
+    fn deserialize(scope: &mut ValueScope<'scope>, value: Value<'scope>)
+        -> Result<Self, TypeError>;
 }
+
+/// Trait that can be used in a trait bound to create owned Rust values.
+///
+/// This is similar to serde's `Deserialize` and `DeserializeOwned` traits.
+pub trait DeserializeOwned: for<'scope> Deserialize<'scope> {}
+impl<T> DeserializeOwned for T where T: for<'scope> Deserialize<'scope> {}
 
 /// Trait for types that are supported to be used as arguments for fastcall functions.
 /// Sealed trait, since there is only a limited amount of types supported by V8.

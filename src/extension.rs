@@ -9,7 +9,7 @@ use std::{
 
 use crate::{
     runtime::STATE_DATA_SLOT,
-    traits::{FromValue, IntoValue},
+    traits::{Deserialize, Serialize},
     value::{self, NewStringType, Seal, Unseal},
 };
 
@@ -38,9 +38,9 @@ pub unsafe trait FastcallFunction: v8::fast_api::FastFunction {
 /// Trait for the arguments of extension functions.
 ///
 /// This is a sealed trait that is not supposed to be implemented outside the crate.
-pub trait FunctionArguments<F, R>: private::Sealed {
+pub trait FunctionArguments<'scope, F, R>: private::Sealed {
     #[doc(hidden)]
-    fn call<'scope>(
+    fn call(
         scope: &mut v8::HandleScope<'scope>,
         args: v8::FunctionCallbackArguments<'scope>,
         rv: v8::ReturnValue,
@@ -51,9 +51,9 @@ pub trait FunctionArguments<F, R>: private::Sealed {
 /// Trait for the arguments of extension functions that can mutate the runtime state.
 ///
 /// This is a sealed trait that is not supposed to be implemented outside the crate.
-pub trait FunctionWithStateArguments<F, R, S>: private::Sealed {
+pub trait FunctionWithStateArguments<'scope, F, R, S>: private::Sealed {
     #[doc(hidden)]
-    fn call<'scope>(
+    fn call(
         scope: &mut v8::HandleScope<'scope>,
         args: v8::FunctionCallbackArguments<'scope>,
         rv: v8::ReturnValue,
@@ -75,13 +75,13 @@ pub fn set_result<'scope, R>(
     mut rv: v8::ReturnValue,
     result: R,
 ) where
-    R: 'static + IntoValue,
+    R: 'static + Serialize,
 {
     let scope = scope.seal();
 
     // Some types can skip the serialization, like for example `()`.
     if !R::is_undefined() {
-        let value = match result.into_v8(scope) {
+        let value = match result.serialize(scope) {
             Ok(value) => value,
             Err(err) => {
                 let msg = value::String::new(scope, String::from(err), NewStringType::Normal);
@@ -102,12 +102,12 @@ pub fn get_argument<'scope, A>(
     pos: c_int,
 ) -> Option<A>
 where
-    A: FromValue<Value = A>,
+    A: Deserialize<'scope>,
 {
     let scope = scope.seal();
 
     let local_value = args.get(pos);
-    return match A::from_v8(scope, local_value.seal()) {
+    return match A::deserialize(scope, local_value.seal()) {
         Ok(arg) => Some(arg),
         Err(err) => {
             let msg = value::String::new(scope, &String::from(err), NewStringType::Normal);
@@ -121,13 +121,13 @@ where
 #[rustfmt::skip]
 macro_rules! impl_function_arguments {
     () => (
-        impl<FN, RE> FunctionArguments<FN, RE> for ()
+        impl<'scope, FN, RE> FunctionArguments<'scope, FN, RE> for ()
         where
             FN: 'static + Send + Sync + Fn(()) -> RE,
-            RE: 'static + IntoValue,
+            RE: 'static + Serialize,
         {
             #[inline(always)]
-            fn call<'scope>(
+            fn call(
                 scope: &mut v8::HandleScope<'scope>,
                 _args: v8::FunctionCallbackArguments<'scope>,
                 rv: v8::ReturnValue,
@@ -138,13 +138,13 @@ macro_rules! impl_function_arguments {
             }
         }
         
-        impl<FN, RE, STATE> FunctionWithStateArguments<FN, RE, STATE> for ()
+        impl<'scope, FN, RE, STATE> FunctionWithStateArguments<'scope, FN, RE, STATE> for ()
         where
             FN: 'static + Send + Sync + Fn(&mut STATE, ()) -> RE,
-            RE: 'static + IntoValue,
+            RE: 'static + Serialize,
         {
             #[inline(always)]
-            fn call<'scope>(
+            fn call(
                 scope: &mut v8::HandleScope<'scope>,
                 _args: v8::FunctionCallbackArguments<'scope>,
                 rv: v8::ReturnValue,
@@ -159,14 +159,14 @@ macro_rules! impl_function_arguments {
         impl private::Sealed for () {}
     );
     ($($generic:ident)*; $($arg:ident)*; $($count:literal)*) => {
-        impl<FN, RE, $($generic,)*> FunctionArguments<FN, RE> for ($($generic,)*)
+        impl<'scope, FN, RE, $($generic,)*> FunctionArguments<'scope, FN, RE> for ($($generic,)*)
         where
             FN: 'static + Send + Sync + Fn(($($generic,)*)) -> RE,
-            RE: 'static + IntoValue,
-            $($generic: FromValue<Value = $generic>,)*
+            RE: 'static + Serialize,
+            $($generic: Deserialize<'scope>,)*
         {
             #[inline(always)]
-            fn call<'scope>(
+            fn call(
                 scope: &mut v8::HandleScope<'scope>,
                 args: v8::FunctionCallbackArguments<'scope>,
                 mut rv: v8::ReturnValue,
@@ -182,14 +182,14 @@ macro_rules! impl_function_arguments {
             }
         }
 
-        impl<FN, RE, STATE, $($generic,)*> FunctionWithStateArguments<FN, RE, STATE> for ($($generic,)*)
+        impl<'scope, FN, RE, STATE, $($generic,)*> FunctionWithStateArguments<'scope, FN, RE, STATE> for ($($generic,)*)
         where
             FN: 'static + Send + Sync + Fn(&mut STATE, ($($generic,)*)) -> RE,
-            RE: 'static + IntoValue,
-            $($generic: FromValue<Value = $generic>,)*
+            RE: 'static + Serialize,
+            $($generic: Deserialize<'scope>,)*
         {
             #[inline(always)]
-            fn call<'scope>(
+            fn call(
                 scope: &mut v8::HandleScope<'scope>,
                 args: v8::FunctionCallbackArguments<'scope>,
                 mut rv: v8::ReturnValue,
@@ -333,8 +333,8 @@ impl<STATE> Extension<STATE> {
         rv: v8::ReturnValue,
     ) where
         F: 'static + Send + Sync + Fn(A) -> R,
-        A: FunctionArguments<F, R>,
-        R: IntoValue,
+        A: FunctionArguments<'scope, F, R>,
+        R: Serialize,
     {
         // SAFETY: This is safe since we made sure to leak the boxed callback (static lifetime)
         //         and the implementation makes sure, that the data contains the pointer of the
@@ -353,8 +353,8 @@ impl<STATE> Extension<STATE> {
         rv: v8::ReturnValue,
     ) where
         F: 'static + Send + Sync + Fn(&mut STATE, A) -> R,
-        A: FunctionWithStateArguments<F, R, STATE>,
-        R: IntoValue,
+        A: FunctionWithStateArguments<'scope, F, R, STATE>,
+        R: Serialize,
     {
         // SAFETY: This is safe since we made sure to leak the boxed callback (static lifetime)
         //         and the implementation makes sure, that the data contains the pointer of the
@@ -384,8 +384,8 @@ impl<STATE> Extension<STATE> {
     pub fn add_function<F, A, R>(&mut self, name: &str, function: F)
     where
         F: 'static + Send + Sync + Fn(A) -> R,
-        A: FunctionArguments<F, R>,
-        R: IntoValue,
+        A: for<'s> FunctionArguments<'s, F, R>,
+        R: Serialize,
     {
         use v8::MapFnTo;
 
@@ -425,8 +425,8 @@ impl<STATE> Extension<STATE> {
     pub fn add_function_with_state<F, A, R>(&mut self, name: &str, function: F)
     where
         F: 'static + Send + Sync + Fn(&mut STATE, A) -> R,
-        A: FunctionWithStateArguments<F, R, STATE>,
-        R: IntoValue,
+        A: for<'scope> FunctionWithStateArguments<'scope, F, R, STATE>,
+        R: Serialize,
     {
         use v8::MapFnTo;
 

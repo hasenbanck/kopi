@@ -17,9 +17,8 @@ cargo.io.
                  sources. This features uses the `getrandom` crate to
                  provide a strong entropy source provided by the operating
                  system.
- * (1) `serde` - Implements the `FromValue` and `IntoValue` traits for every
-                 type that implements the `serde::Serialize` and
-                 `serde::Deserialize` traits.
+ * (1) `serde` - Adds support to serialize and deserialize any serde
+                 compatible type.
 
 (1) Not implemented yet
 

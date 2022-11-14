@@ -1,7 +1,6 @@
 //! Values that the engine uses.
 //!
-//! The API is optimized to be used in the [`FromValue`] and [`ToValue`] traits for serialization
-//! and deserialization.
+//! The API is optimized to be used in the [`Serialize`] and [`Deserialize`] traits.
 
 mod array;
 mod bigint;

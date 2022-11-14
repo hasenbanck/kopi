@@ -86,7 +86,7 @@ pub use self::{
     heap_statistics::HeapStatistics,
     runtime::{Runtime, RuntimeOptions},
     serialization::*,
-    traits::{FastcallArgument, FastcallReturnValue, FromValue, IntoValue},
+    traits::{Deserialize, FastcallArgument, FastcallReturnValue, Serialize},
 };
 
 const DEFAULT_V8_FLAGS: &str = "--turbo_fast_api_calls";

@@ -5,8 +5,8 @@
 ///
 /// When given as the first argument, the function can also mutate the runtime state.
 /// 
-/// Function arguments need to implement the [`crate::FromValue`] trait.
-/// Return parameter need to implement the [`crate::IntoValue`] trait.
+/// Function arguments need to implement the [`crate::Deserialize`] trait.
+/// Return parameter need to implement the [`crate::Serialize`] trait.
 ///
 /// # Example
 /// 

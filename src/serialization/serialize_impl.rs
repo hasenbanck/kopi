@@ -1,15 +1,17 @@
+use v8::NewStringType;
+
 use crate::{
     error::TypeError,
-    traits::IntoValue,
-    value::{BigInt, Boolean, Integer, Number, Primitive, Value, ValueScope},
+    traits::Serialize,
+    value::{BigInt, Boolean, Integer, Number, Primitive, String, Value, ValueScope},
 };
 
 const MAX_SAFE_INTEGER: i64 = 2i64.pow(53) - 1i64;
 const MIN_SAFE_INTEGER: i64 = -(2i64.pow(53) - 1i64);
 
-impl IntoValue for () {
+impl Serialize for () {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Primitive::new_undefined(scope).into())
     }
 
@@ -18,37 +20,44 @@ impl IntoValue for () {
     }
 }
 
-impl IntoValue for bool {
+impl Serialize for bool {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Boolean::new(scope, self).into())
     }
 }
 
-impl IntoValue for i8 {
+impl Serialize for char {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(String::new(scope, self.to_string(), NewStringType::Normal).into())
+    }
+}
+
+impl Serialize for i8 {
+    #[inline(always)]
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Integer::new_from_i32(scope, i32::from(self)).into())
     }
 }
 
-impl IntoValue for i16 {
+impl Serialize for i16 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Integer::new_from_i32(scope, i32::from(self)).into())
     }
 }
 
-impl IntoValue for i32 {
+impl Serialize for i32 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Integer::new_from_i32(scope, self).into())
     }
 }
 
-impl IntoValue for i64 {
+impl Serialize for i64 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         if self > MAX_SAFE_INTEGER || self < MIN_SAFE_INTEGER {
             Ok(BigInt::new_from_i64(scope, self).into())
         } else if self > i32::MAX as i64 || self < i32::MIN as i64 {
@@ -59,30 +68,30 @@ impl IntoValue for i64 {
     }
 }
 
-impl IntoValue for u8 {
+impl Serialize for u8 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Integer::new_from_u32(scope, u32::from(self)).into())
     }
 }
 
-impl IntoValue for u16 {
+impl Serialize for u16 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Integer::new_from_u32(scope, u32::from(self)).into())
     }
 }
 
-impl IntoValue for u32 {
+impl Serialize for u32 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Integer::new_from_u32(scope, self).into())
     }
 }
 
-impl IntoValue for u64 {
+impl Serialize for u64 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         if self > MAX_SAFE_INTEGER as u64 {
             Ok(BigInt::new_from_u64(scope, self).into())
         } else if self > u32::MAX as u64 {
@@ -93,17 +102,29 @@ impl IntoValue for u64 {
     }
 }
 
-impl IntoValue for f32 {
+impl Serialize for f32 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Number::new(scope, f64::from(self)).into())
     }
 }
 
-impl IntoValue for f64 {
+impl Serialize for f64 {
     #[inline(always)]
-    fn into_v8<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
         Ok(Number::new(scope, self).into())
+    }
+}
+
+impl Serialize for std::string::String {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(String::new(scope, self.as_str(), NewStringType::Normal).into())
+    }
+}
+
+impl Serialize for &str {
+    fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
+        Ok(String::new(scope, self, NewStringType::Normal).into())
     }
 }
 
@@ -111,15 +132,15 @@ impl IntoValue for f64 {
 mod test {
     use super::{MAX_SAFE_INTEGER, MIN_SAFE_INTEGER};
     use crate::{
-        initialize_with_defaults, traits::IntoValue, Extension, FunctionArguments, Runtime,
+        initialize_with_defaults, traits::Serialize, Extension, FunctionArguments, Runtime,
         RuntimeOptions,
     };
 
     pub fn test<F, A, R>(expected_type: &str, expected_value: &str, function: F)
     where
         F: 'static + Send + Sync + Fn(A) -> R,
-        A: FunctionArguments<F, R>,
-        R: IntoValue,
+        A: for<'s> FunctionArguments<'s, F, R>,
+        R: Serialize,
     {
         initialize_with_defaults();
         let mut extension = Extension::new(None);

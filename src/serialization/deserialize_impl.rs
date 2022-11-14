@@ -1,29 +1,35 @@
 use crate::{
     error::{create_type_error, TypeError},
-    traits::FromValue,
+    traits::Deserialize,
     value::{BigInt, Boolean, Int32, Integer, Number, Uint32, Value, ValueScope},
 };
 
-impl FromValue for () {
-    type Value = ();
-
+impl<'scope> Deserialize<'scope> for Value<'scope> {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
+        _scope: &mut ValueScope<'scope>,
+        value: Value<'scope>,
+    ) -> Result<Self, TypeError> {
+        Ok(value)
+    }
+}
+
+impl<'scope> Deserialize<'scope> for () {
+    #[inline(always)]
+    fn deserialize(
         _scope: &mut ValueScope<'scope>,
         _value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         Ok(())
     }
 }
 
-impl FromValue for bool {
-    type Value = bool;
-
+impl<'scope> Deserialize<'scope> for bool {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Boolean::try_from(value) {
             Ok(val.value())
         } else {
@@ -36,26 +42,22 @@ impl FromValue for bool {
     }
 }
 
-impl FromValue for String {
-    type Value = String;
-
+impl<'scope> Deserialize<'scope> for String {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         Ok(value.to_string_representation(scope))
     }
 }
 
-impl FromValue for i8 {
-    type Value = i8;
-
+impl<'scope> Deserialize<'scope> for i8 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             let val = i8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
@@ -90,14 +92,12 @@ impl FromValue for i8 {
     }
 }
 
-impl FromValue for i16 {
-    type Value = i16;
-
+impl<'scope> Deserialize<'scope> for i16 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             let val = i16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
@@ -132,14 +132,12 @@ impl FromValue for i16 {
     }
 }
 
-impl FromValue for i32 {
-    type Value = i32;
-
+impl<'scope> Deserialize<'scope> for i32 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             let val = i32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i32", scope, &value))?;
@@ -172,14 +170,12 @@ impl FromValue for i32 {
     }
 }
 
-impl FromValue for i64 {
-    type Value = i64;
-
+impl<'scope> Deserialize<'scope> for i64 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             Ok(val.value())
         } else if let Ok(val) = BigInt::try_from(value) {
@@ -209,14 +205,12 @@ impl FromValue for i64 {
     }
 }
 
-impl FromValue for u8 {
-    type Value = u8;
-
+impl<'scope> Deserialize<'scope> for u8 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             let val = u8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
@@ -251,14 +245,12 @@ impl FromValue for u8 {
     }
 }
 
-impl FromValue for u16 {
-    type Value = u16;
-
+impl<'scope> Deserialize<'scope> for u16 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             let val = u16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
@@ -293,14 +285,12 @@ impl FromValue for u16 {
     }
 }
 
-impl FromValue for u32 {
-    type Value = u32;
-
+impl<'scope> Deserialize<'scope> for u32 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             let val = u32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u32", scope, &value))?;
@@ -333,14 +323,12 @@ impl FromValue for u32 {
     }
 }
 
-impl FromValue for u64 {
-    type Value = u64;
-
+impl<'scope> Deserialize<'scope> for u64 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
             let val = u64::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u64", scope, &value))?;
@@ -373,28 +361,24 @@ impl FromValue for u64 {
     }
 }
 
-impl FromValue for f32 {
-    type Value = f32;
-
+impl<'scope> Deserialize<'scope> for f32 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         let value = Number::try_from(value)
             .map_err(|_| create_type_error("Value not a f32", scope, &value))?;
         Ok(value.value() as f32)
     }
 }
 
-impl FromValue for f64 {
-    type Value = f64;
-
+impl<'scope> Deserialize<'scope> for f64 {
     #[inline(always)]
-    fn from_v8<'scope>(
+    fn deserialize(
         scope: &mut ValueScope<'scope>,
         value: Value<'scope>,
-    ) -> Result<Self::Value, TypeError> {
+    ) -> Result<Self, TypeError> {
         let value = Number::try_from(value)
             .map_err(|_| create_type_error("Value not a f64", scope, &value))?;
         Ok(value.value())
@@ -405,12 +389,12 @@ impl FromValue for f64 {
 mod test {
     use std::fmt::Debug;
 
-    use crate::{initialize_with_defaults, traits::FromValue, Runtime, RuntimeOptions};
+    use crate::{initialize_with_defaults, traits::DeserializeOwned, Runtime, RuntimeOptions};
 
     fn test_from<STATE, SOURCE, T>(runtime: &mut Runtime<STATE>, source: SOURCE, expected: T)
     where
         SOURCE: AsRef<str>,
-        T: FromValue<Value = T> + Eq + Debug,
+        T: DeserializeOwned + Eq + Debug,
     {
         let val: T = runtime.execute(source).expect("Can't execute code");
         assert_eq!(val, expected);

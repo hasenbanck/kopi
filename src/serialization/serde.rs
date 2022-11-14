@@ -1,30 +1,39 @@
+mod deserializer;
+mod serializer;
+
+use deserializer::ValueDeserializer;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     error::TypeError,
+    serialization::serde::serializer::ValueSerializer,
     value::{Value, ValueScope},
 };
 
-/// Converts a ECMAScript value to a deserializable type.
+/// Converts a engine value to a deserializable type.
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-pub fn deserialize_value<'scope, T>(
-    _scope: &mut ValueScope<'scope>,
-    _value: Value<'scope>,
+pub fn from_value<'scope, T>(
+    scope: &mut ValueScope<'scope>,
+    value: Value<'scope>,
 ) -> Result<T, TypeError>
 where
     T: Deserialize<'scope>,
 {
-    todo!()
+    let deserializer = &mut ValueDeserializer::from_value(scope, value);
+    let t = T::deserialize(deserializer)?;
+    Ok(t)
 }
 
-/// Converts a serializable type to a ECMAScript value.
+/// Converts a serializable type to a engine value.
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-pub fn serialize_value<'scope, T>(
-    _scope: &mut ValueScope<'scope>,
-    _value: T,
+pub fn to_value<'scope, T>(
+    scope: &mut ValueScope<'scope>,
+    value: T,
 ) -> Result<Value<'scope>, TypeError>
 where
     T: Serialize,
 {
-    todo!()
+    let mut serializer = ValueSerializer { scope };
+    let value = value.serialize(&mut serializer)?;
+    Ok(value)
 }

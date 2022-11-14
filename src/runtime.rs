@@ -10,7 +10,7 @@ pub const STATE_DATA_SLOT: u32 = 0;
 use crate::{
     error::{create_error_from_exception, Error},
     extension::FunctionDeclaration,
-    traits::FromValue,
+    traits::DeserializeOwned,
     value::{new_string, NewStringType, Seal},
     Extension, HeapStatistics, V8_INITIALIZATION,
 };
@@ -216,7 +216,7 @@ impl<STATE> Runtime<STATE> {
     /// Executes the ECMAScript as a classic script inside the runtime and returns the evaluated value.
     pub fn execute<T, SOURCE>(&mut self, source: SOURCE) -> Result<T, Error>
     where
-        T: FromValue<Value = T>,
+        T: DeserializeOwned,
         SOURCE: AsRef<str>,
     {
         let source = source.as_ref();
@@ -236,7 +236,7 @@ impl<STATE> Runtime<STATE> {
             return create_error_from_exception(try_catch_scope, exception);
         };
 
-        T::from_v8(try_catch_scope.seal(), v8_value.seal()).map_err(Error::Type)
+        T::deserialize(try_catch_scope.seal(), v8_value.seal()).map_err(Error::Type)
     }
 
     /// Returns a collection of information about the heap of the engine.

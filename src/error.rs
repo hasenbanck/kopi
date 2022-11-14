@@ -36,31 +36,60 @@ impl std::error::Error for Error {}
 #[derive(Debug)]
 pub struct TypeError {
     /// The message of the type error.
-    pub msg: &'static str,
-    /// The string representation of the source value.
-    pub source: String,
+    pub msg: String,
 }
 
 impl std::fmt::Display for TypeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: {}", self.msg, self.source)
+        write!(f, "{}", self.msg)
     }
 }
 
 impl From<TypeError> for String {
     fn from(te: TypeError) -> Self {
-        format!("{}, {}", te.msg, &te.source)
+        format!("{}", te.msg)
+    }
+}
+
+impl std::error::Error for TypeError {}
+
+#[cfg(feature = "serde")]
+impl serde::de::Error for TypeError {
+    fn custom<T>(msg: T) -> Self
+    where
+        T: std::fmt::Display,
+    {
+        Self {
+            msg: msg.to_string(),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::ser::Error for TypeError {
+    fn custom<T>(msg: T) -> Self
+    where
+        T: std::fmt::Display,
+    {
+        Self {
+            msg: msg.to_string(),
+        }
     }
 }
 
 /// Shortcut to create a type error.
-pub fn create_type_error<'scope>(
-    msg: &'static str,
+pub fn create_type_error<'scope, S>(
+    msg: S,
     scope: &mut ValueScope<'scope>,
     value: &Value<'scope>,
-) -> TypeError {
+) -> TypeError
+where
+    S: AsRef<str>,
+{
     let source = value.to_string_representation(scope);
-    TypeError { msg, source }
+    TypeError {
+        msg: format!("{}: {}", msg.as_ref(), source),
+    }
 }
 
 /// Creates an error from an exception.

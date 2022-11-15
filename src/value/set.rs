@@ -1,6 +1,6 @@
 use super::{Seal, Unseal, Value};
 
-/// A set value.
+/// A hash set.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Set<'scope>(pub(crate) v8::Local<'scope, v8::Set>);

@@ -1,6 +1,6 @@
 use super::{Primitive, Seal, Unseal, Value, ValueScope};
 
-/// A number value.
+/// A number value. Backed as a 64-bit float.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Number<'scope>(pub(crate) v8::Local<'scope, v8::Number>);

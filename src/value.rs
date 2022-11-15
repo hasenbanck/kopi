@@ -3,8 +3,11 @@
 //! The API is optimized to be used in the [`Serialize`] and [`Deserialize`] traits.
 
 mod array;
+mod array_buffer;
+mod array_buffer_view;
 mod bigint;
 mod boolean;
+mod data_view;
 mod error;
 mod int32;
 mod integer;
@@ -16,22 +19,27 @@ mod primitive;
 mod set;
 mod stack_trace;
 mod string;
+mod typed_array;
+mod uint16_array;
 mod uint32;
+mod uint8_array;
 
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
-    ArrayBuffer, ArrayBufferView, BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data,
-    DataView, Date, External, FixedArray, Float32Array, Float64Array, Function, Int16Array,
-    Int32Array, Int8Array, Message, NumberObject, PrimitiveArray, Promise, PromiseResolver, Proxy,
-    RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject, TypedArray, Uint16Array,
-    Uint32Array, Uint8Array, Uint8ClampedArray, WasmMemoryObject, WasmModuleObject,
+    BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data, Date, External, FixedArray,
+    Float32Array, Float64Array, Function, Int16Array, Int32Array, Int8Array, Message, NumberObject,
+    PrimitiveArray, Promise, PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject,
+    Symbol, SymbolObject, Uint32Array, Uint8ClampedArray, WasmMemoryObject, WasmModuleObject,
 };
 
 pub use self::{
     array::Array,
+    array_buffer::ArrayBuffer,
+    array_buffer_view::ArrayBufferView,
     bigint::BigInt,
     boolean::Boolean,
+    data_view::DataView,
     error::Error,
     int32::Int32,
     integer::Integer,
@@ -43,8 +51,13 @@ pub use self::{
     set::Set,
     stack_trace::{StackFrame, StackTrace},
     string::{NewStringType, String},
+    typed_array::TypedArray,
+    uint16_array::Uint16Array,
     uint32::Uint32,
+    uint8_array::Uint8Array,
 };
+
+// TODO add From / TryInto for all subclasses to/from their superclass.
 
 /// Trait for sealing private types. `T` is the public type into which the private type is sealed.
 pub(crate) trait Seal<T> {
@@ -137,8 +150,7 @@ impl<'scope> Value<'scope> {
 
 #[cfg(test)]
 mod test {
-    use super::ValueScope;
-    use crate::value::Value;
+    use super::{Value, ValueScope};
 
     #[test]
     fn transparent_representation_value_scope_() {

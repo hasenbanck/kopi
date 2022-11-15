@@ -1,6 +1,6 @@
 use super::{Integer, Seal, Unseal, Value};
 
-/// A uint32 value.
+/// A 32-bit unsigned integer value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Uint32<'scope>(pub(crate) v8::Local<'scope, v8::Uint32>);

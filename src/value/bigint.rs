@@ -1,6 +1,6 @@
 use super::{Primitive, Seal, Unseal, Value, ValueScope};
 
-/// A big int value.
+/// A big integer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct BigInt<'scope>(pub(crate) v8::Local<'scope, v8::BigInt>);

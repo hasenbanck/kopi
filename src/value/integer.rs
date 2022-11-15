@@ -1,6 +1,6 @@
 use super::{Number, Seal, Unseal, Value, ValueScope};
 
-/// A integer value.
+/// A signed integer value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Integer<'scope>(pub(crate) v8::Local<'scope, v8::Integer>);

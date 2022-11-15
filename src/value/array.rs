@@ -1,6 +1,6 @@
 use super::{Seal, Unseal, Value, ValueScope};
 
-/// A array value.
+/// An array.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Array<'scope>(pub(crate) v8::Local<'scope, v8::Array>);

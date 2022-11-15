@@ -4,7 +4,7 @@ pub use v8::{GetPropertyNamesArgs, IntegrityLevel, PropertyAttribute};
 
 use super::{Array, Name, Seal, Unseal, Value, ValueScope};
 
-/// A object value.
+/// An object.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Object<'scope>(pub(crate) v8::Local<'scope, v8::Object>);

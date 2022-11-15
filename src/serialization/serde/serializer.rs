@@ -5,7 +5,7 @@ use serde::ser::{
 
 use crate::{
     error::TypeError,
-    value::{Value, ValueScope},
+    value::{Primitive, Value, ValueScope},
     Serialize,
 };
 
@@ -77,27 +77,31 @@ impl<'a, 'scope> Serializer for &'a mut ValueSerializer<'a, 'scope> {
         v.serialize(self.scope)
     }
 
-    fn serialize_bytes(self, _v: &[u8]) -> Result<Self::Ok, Self::Error> {
+    // TODO I think we need to use the array buffer here (maybe even a v8::Uint8Array). It seems we have to write into it using a "typed_array.buffer().data()"?
+    fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
+        let _owned = v.to_vec().into_boxed_slice();
+        // TODO maybe with v8::ArrayBuffer::new_backing_store_from_vec() we can give the initialized view?
+        // TODO maybe we then return a v8::Uint8 view on it (it takes an ArrayBuffer).
         todo!()
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        Ok(Primitive::new_null(self.scope).into())
     }
 
-    fn serialize_some<T: ?Sized>(self, _v: &T) -> Result<Self::Ok, Self::Error>
+    fn serialize_some<T: ?Sized>(self, v: &T) -> Result<Self::Ok, Self::Error>
     where
         T: serde::ser::Serialize,
     {
-        todo!()
+        v.serialize(self)
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        Ok(Primitive::new_undefined(self.scope).into())
     }
 
     fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        self.serialize_unit()
     }
 
     fn serialize_unit_variant(
@@ -112,12 +116,12 @@ impl<'a, 'scope> Serializer for &'a mut ValueSerializer<'a, 'scope> {
     fn serialize_newtype_struct<T: ?Sized>(
         self,
         _name: &'static str,
-        _value: &T,
+        value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: serde::ser::Serialize,
     {
-        todo!()
+        value.serialize(self)
     }
 
     fn serialize_newtype_variant<T: ?Sized>(
@@ -133,6 +137,7 @@ impl<'a, 'scope> Serializer for &'a mut ValueSerializer<'a, 'scope> {
         todo!()
     }
 
+    // TODO how do we handle the different specialization arrays?
     fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
         todo!()
     }
@@ -182,7 +187,8 @@ impl<'a, 'scope> Serializer for &'a mut ValueSerializer<'a, 'scope> {
     }
 }
 
-impl<'a, 'scope> SerializeSeq for &'a mut ValueSerializer<'a, 'scope> {
+// TODO This needs it's own struct, since we need to have an array where we append to.
+impl<'a, 'scope> SerializeSeq for &mut ValueSerializer<'a, 'scope> {
     type Ok = Value<'scope>;
     type Error = TypeError;
 
@@ -198,6 +204,7 @@ impl<'a, 'scope> SerializeSeq for &'a mut ValueSerializer<'a, 'scope> {
     }
 }
 
+// TODO This needs it's own struct, since we need to have an array where we append to.
 impl<'a, 'scope> SerializeTuple for &'a mut ValueSerializer<'a, 'scope> {
     type Ok = Value<'scope>;
     type Error = TypeError;
@@ -214,6 +221,7 @@ impl<'a, 'scope> SerializeTuple for &'a mut ValueSerializer<'a, 'scope> {
     }
 }
 
+// TODO This needs it's own struct, since we need to have an array where we append to.
 impl<'a, 'scope> SerializeTupleStruct for &'a mut ValueSerializer<'a, 'scope> {
     type Ok = Value<'scope>;
     type Error = TypeError;
@@ -230,6 +238,7 @@ impl<'a, 'scope> SerializeTupleStruct for &'a mut ValueSerializer<'a, 'scope> {
     }
 }
 
+// TODO This needs it's own struct, since we need to have an array where we append to.
 impl<'a, 'scope> SerializeTupleVariant for &'a mut ValueSerializer<'a, 'scope> {
     type Ok = Value<'scope>;
     type Error = TypeError;
@@ -246,6 +255,7 @@ impl<'a, 'scope> SerializeTupleVariant for &'a mut ValueSerializer<'a, 'scope> {
     }
 }
 
+// TODO This needs it's own struct, since we need to have a map where we append to.
 impl<'a, 'scope> SerializeMap for &'a mut ValueSerializer<'a, 'scope> {
     type Ok = Value<'scope>;
     type Error = TypeError;
@@ -269,6 +279,7 @@ impl<'a, 'scope> SerializeMap for &'a mut ValueSerializer<'a, 'scope> {
     }
 }
 
+// TODO This needs it's own struct, since we need to have a object where we append to.
 impl<'a, 'scope> SerializeStruct for &'a mut ValueSerializer<'a, 'scope> {
     type Ok = Value<'scope>;
     type Error = TypeError;
@@ -289,6 +300,7 @@ impl<'a, 'scope> SerializeStruct for &'a mut ValueSerializer<'a, 'scope> {
     }
 }
 
+// TODO This needs it's own struct, since we need to have a object where we append to.
 impl<'a, 'scope> SerializeStructVariant for &'a mut ValueSerializer<'a, 'scope> {
     type Ok = Value<'scope>;
     type Error = TypeError;

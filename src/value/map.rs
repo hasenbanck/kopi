@@ -1,7 +1,7 @@
 use super::{Seal, Unseal, Value, ValueScope};
 use crate::value::Array;
 
-/// A map value.
+/// A hash map.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Map<'scope>(pub(crate) v8::Local<'scope, v8::Map>);

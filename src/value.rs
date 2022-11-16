@@ -9,6 +9,8 @@ mod bigint;
 mod boolean;
 mod data_view;
 mod error;
+mod float32_array;
+mod float64_array;
 mod int32;
 mod integer;
 mod map;
@@ -22,15 +24,17 @@ mod string;
 mod typed_array;
 mod uint16_array;
 mod uint32;
+mod uint32_array;
 mod uint8_array;
+mod uint8_clamped_array;
 
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
     BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data, Date, External, FixedArray,
-    Float32Array, Float64Array, Function, Int16Array, Int32Array, Int8Array, Message, NumberObject,
-    PrimitiveArray, Promise, PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject,
-    Symbol, SymbolObject, Uint32Array, Uint8ClampedArray, WasmMemoryObject, WasmModuleObject,
+    Function, Int16Array, Int32Array, Int8Array, Message, NumberObject, PrimitiveArray, Promise,
+    PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject,
+    WasmMemoryObject, WasmModuleObject,
 };
 
 pub use self::{
@@ -41,6 +45,8 @@ pub use self::{
     boolean::Boolean,
     data_view::DataView,
     error::Error,
+    float32_array::Float32Array,
+    float64_array::Float64Array,
     int32::Int32,
     integer::Integer,
     map::Map,
@@ -54,7 +60,9 @@ pub use self::{
     typed_array::TypedArray,
     uint16_array::Uint16Array,
     uint32::Uint32,
+    uint32_array::Uint32Array,
     uint8_array::Uint8Array,
+    uint8_clamped_array::Uint8ClampedArray,
 };
 
 // TODO add From / TryInto for all subclasses to/from their superclass.

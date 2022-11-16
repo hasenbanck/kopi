@@ -1,4 +1,4 @@
-use super::{ArrayBuffer, Seal, Unseal, Value, ValueScope};
+use super::{Seal, Unseal, Value, ValueScope};
 
 /// A data view into an array buffer.
 #[derive(Copy, Clone)]

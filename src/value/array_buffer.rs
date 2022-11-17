@@ -36,8 +36,6 @@ impl<'scope> TryFrom<Value<'scope>> for ArrayBuffer<'scope> {
     }
 }
 
-// TODO test all buffer.
-
 impl<'scope> ArrayBuffer<'scope> {
     /// Creates a new array buffer from the given boxed slice.
     #[inline(always)]

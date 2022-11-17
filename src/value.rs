@@ -11,7 +11,10 @@ mod data_view;
 mod error;
 mod float32_array;
 mod float64_array;
+mod int16_array;
 mod int32;
+mod int32_array;
+mod int8_array;
 mod integer;
 mod map;
 mod name;
@@ -31,10 +34,9 @@ mod uint8_clamped_array;
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
-    BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Data, Date, External, FixedArray,
-    Function, Int16Array, Int32Array, Int8Array, Message, NumberObject, PrimitiveArray, Promise,
-    PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject,
-    WasmMemoryObject, WasmModuleObject,
+    BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Date, External, Function, Message,
+    NumberObject, Promise, PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol,
+    SymbolObject, WasmMemoryObject, WasmModuleObject,
 };
 
 pub use self::{
@@ -47,7 +49,10 @@ pub use self::{
     error::Error,
     float32_array::Float32Array,
     float64_array::Float64Array,
+    int16_array::Int16Array,
     int32::Int32,
+    int32_array::Int32Array,
+    int8_array::Int8Array,
     integer::Integer,
     map::Map,
     name::Name,
@@ -65,7 +70,8 @@ pub use self::{
     uint8_clamped_array::Uint8ClampedArray,
 };
 
-// TODO add From / TryInto for all subclasses to/from their superclass.
+// TODO add From for all subclasses to their superclass.
+// TODO test the methods if they function as expected.
 
 /// Trait for sealing private types. `T` is the public type into which the private type is sealed.
 pub(crate) trait Seal<T> {

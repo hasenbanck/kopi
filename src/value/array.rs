@@ -69,12 +69,17 @@ impl<'scope> Array<'scope> {
         self.0.get_index(scope.unseal(), pos).map(|v| v.seal())
     }
 
+    // TODO test this error case.
     /// Sets the value at the given array position. Returns `true` if the value could be written.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the caller tries to set a value outside of the array range.
     #[inline(always)]
-    pub fn set(&self, scope: &mut ValueScope<'scope>, pos: u32, value: Value<'scope>) -> bool {
+    pub fn set(&self, scope: &mut ValueScope<'scope>, pos: u32, value: Value<'scope>) {
         self.0
             .set_index(scope.unseal(), pos, value.unseal())
-            .unwrap_or(false)
+            .expect("Out of bound access");
     }
 
     /// Returns the length of the array.

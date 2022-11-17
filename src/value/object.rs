@@ -92,6 +92,7 @@ impl<'scope> Object<'scope> {
         .seal()
     }
 
+    // TODO return error in case it fails.
     /// Sets the value at the given key.
     ///
     /// Returns `false` if the value could not be set.
@@ -107,6 +108,7 @@ impl<'scope> Object<'scope> {
             .unwrap_or(false)
     }
 
+    // TODO return error in case it fails.
     /// Sets the value at the given index.
     ///
     /// Returns `false` if the value could not be set.
@@ -122,6 +124,7 @@ impl<'scope> Object<'scope> {
             .unwrap_or(false)
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Set the prototype object.
     ///
     /// Returns `false` if the prototype could not be set.
@@ -132,6 +135,7 @@ impl<'scope> Object<'scope> {
             .unwrap_or(false)
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Implements `CreateDataProperty` (ECMA-262, 7.3.5).
     ///
     /// Defines a configurable, writable, enumerable property with the given value on the object
@@ -150,6 +154,7 @@ impl<'scope> Object<'scope> {
             .unwrap_or(false)
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Implements `DefineOwnProperty` (ECMA-262, 10.1.6).
     ///
     /// In general, [`Object::create_data_property()`] will be faster, however, does not allow for
@@ -222,6 +227,7 @@ impl<'scope> Object<'scope> {
             .map(|v| v.seal())
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Calls the abstract operation HasProperty(O, P) (ECMA-262, 7.3.12).
     ///
     /// Returns `true` if the object has the property.
@@ -230,12 +236,14 @@ impl<'scope> Object<'scope> {
         self.0.has(scope.unseal(), key.unseal()).unwrap_or(false)
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Returns `true` if there is a value at the given index.
     #[inline(always)]
     pub fn has_index(&self, scope: &mut ValueScope<'scope>, index: u32) -> bool {
         self.0.has_index(scope.unseal(), index).unwrap_or(false)
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Calls the abstract operation HasOwnProperty(O, P) (ECMA-262, 7.3.13).
     ///
     /// Returns `true` if the object has the property.
@@ -246,6 +254,7 @@ impl<'scope> Object<'scope> {
             .unwrap_or(false)
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Deletes the value at the given key.
     ///
     /// Returns `true` if the value could be deleted.
@@ -254,6 +263,7 @@ impl<'scope> Object<'scope> {
         self.0.delete(scope.unseal(), key.unseal()).unwrap_or(false)
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Deletes the value at the given index.
     ///
     /// Returns `true` if the value could be deleted.
@@ -280,6 +290,7 @@ impl<'scope> Object<'scope> {
             .map(|v| v.seal())
     }
 
+    // TODO return error in case it fails. What is the error case?
     /// Sets the integrity level of the object.
     ///
     /// Returns `true` if the integrity level could be set.

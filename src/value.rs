@@ -184,7 +184,7 @@ mod test {
     use super::{Value, ValueScope};
 
     #[test]
-    fn transparent_representation_value_scope_() {
+    fn transparent_representation_value_scope() {
         // Make sure that both types are of the same size and alignment.
         assert_eq!(
             std::mem::size_of::<ValueScope>(),

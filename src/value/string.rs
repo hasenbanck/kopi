@@ -2,8 +2,15 @@ pub use v8::NewStringType;
 
 use super::{Name, Seal, Unseal, Value, ValueScope};
 
-static MAX_STRING_SIZE: once_cell::sync::Lazy<usize> =
-    once_cell::sync::Lazy::new(v8::String::max_length);
+/// Maximal string length.
+/// As declared in "include/v8-primitive.h".
+#[cfg(target_pointer_width = "32")]
+static MAX_STRING_SIZE: usize = (1 << 28) - 16;
+
+/// Maximal string length.
+/// As declared in "include/v8-primitive.h".
+#[cfg(target_pointer_width = "64")]
+static MAX_STRING_LENGTH: usize = (1 << 29) - 24;
 
 /// A string value.
 #[derive(Copy, Clone)]
@@ -59,7 +66,7 @@ impl<'scope> String<'scope> {
         S: AsRef<str>,
     {
         let data = string.as_ref().as_bytes();
-        let max_length = usize::min(*MAX_STRING_SIZE, data.len());
+        let max_length = usize::min(MAX_STRING_LENGTH, data.len());
 
         v8::String::new_from_utf8(scope.unseal(), &data[..max_length], string_type)
             .expect("String is too large for V8")
@@ -69,7 +76,7 @@ impl<'scope> String<'scope> {
     /// Creates a new string from a static string. Will truncate string if they are too long.
     pub fn new_from_static(scope: &mut ValueScope<'scope>, string: &'static str) -> String<'scope> {
         let data = string.as_bytes();
-        let max_length = usize::min(*MAX_STRING_SIZE, data.len());
+        let max_length = usize::min(MAX_STRING_LENGTH, data.len());
 
         v8::String::new_external_onebyte_static(scope.unseal(), &data[..max_length])
             .expect("String is too large for V8")
@@ -95,7 +102,17 @@ where
     S: AsRef<str>,
 {
     let data = string.as_ref().as_bytes();
-    let max_length = usize::min(*MAX_STRING_SIZE, data.len());
+    let max_length = usize::min(MAX_STRING_LENGTH, data.len());
     v8::String::new_from_utf8(scope, &data[..max_length], string_type)
         .expect("String is too large for V8")
+}
+
+#[cfg(test)]
+mod test {
+    use crate::value::string::MAX_STRING_LENGTH;
+
+    #[test]
+    fn verify_max_string_length() {
+        assert_eq!(MAX_STRING_LENGTH, v8::String::max_length());
+    }
 }

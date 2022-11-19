@@ -37,5 +37,5 @@ impl<'scope> TryFrom<Value<'scope>> for Set<'scope> {
 }
 
 impl<'scope> Set<'scope> {
-    // rusty_v8 doesn't export the set operations of V8.
+    // TODO rusty_v8 doesn't export the set operations of V8.
 }

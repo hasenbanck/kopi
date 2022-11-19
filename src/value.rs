@@ -7,9 +7,12 @@ mod array_buffer;
 mod array_buffer_view;
 mod bigint;
 mod bigint64_array;
+mod bigint_object;
 mod biguint64_array;
 mod boolean;
+mod boolean_object;
 mod data_view;
+mod date;
 mod error;
 mod float32_array;
 mod float64_array;
@@ -21,11 +24,15 @@ mod integer;
 mod map;
 mod name;
 mod number;
+mod number_object;
 mod object;
 mod primitive;
 mod set;
 mod stack_trace;
 mod string;
+mod string_object;
+mod symbol;
+mod symbol_object;
 mod typed_array;
 mod uint16_array;
 mod uint32;
@@ -36,9 +43,8 @@ mod uint8_clamped_array;
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
-    BigIntObject, BooleanObject, Date, External, Function, Message, NumberObject, Promise,
-    PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject,
-    WasmMemoryObject, WasmModuleObject,
+    External, Function, Message, Promise, PromiseResolver, Proxy, RegExp, WasmMemoryObject,
+    WasmModuleObject,
 };
 
 pub use self::{
@@ -47,9 +53,12 @@ pub use self::{
     array_buffer_view::ArrayBufferView,
     bigint::BigInt,
     bigint64_array::BigInt64Array,
+    bigint_object::BigIntObject,
     biguint64_array::BigUint64Array,
     boolean::Boolean,
+    boolean_object::BooleanObject,
     data_view::DataView,
+    date::Date,
     error::Error,
     float32_array::Float32Array,
     float64_array::Float64Array,
@@ -61,11 +70,15 @@ pub use self::{
     map::Map,
     name::Name,
     number::Number,
+    number_object::NumberObject,
     object::Object,
     primitive::Primitive,
     set::Set,
     stack_trace::{StackFrame, StackTrace},
     string::{NewStringType, String},
+    string_object::StringObject,
+    symbol::Symbol,
+    symbol_object::SymbolObject,
     typed_array::TypedArray,
     uint16_array::Uint16Array,
     uint32::Uint32,

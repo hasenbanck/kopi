@@ -81,6 +81,8 @@ impl<'scope> String<'scope> {
     pub fn value(&self, scope: &mut ValueScope<'scope>) -> std::string::String {
         self.0.to_rust_string_lossy(scope.unseal())
     }
+
+    // TODO export safe variants of the write_* functions.
 }
 
 /// Utility function to create a new V8 string. Will truncate string if they are too long.

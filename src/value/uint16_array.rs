@@ -2,7 +2,7 @@ use std::{ffi::c_void, mem::ManuallyDrop, ptr::null_mut};
 
 use super::{Seal, Unseal, Value, ValueScope};
 
-/// A uint16 array backed by a array buffer.
+/// A [`Uint16Array`] backed by a array buffer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Uint16Array<'scope>(pub(crate) v8::Local<'scope, v8::Uint16Array>);
@@ -57,14 +57,14 @@ pub unsafe extern "C" fn vec_deleter_callback(
 }
 
 impl<'scope> Uint16Array<'scope> {
-    /// Creates a new uint16 array.
+    /// Creates a new [`Uint16Array`].
     #[inline(always)]
     pub fn new(scope: &mut ValueScope<'scope>, length: usize) -> Uint16Array<'scope> {
         let data = vec![0u16; length].into_boxed_slice();
         Self::new_from_boxed_slice(scope, data)
     }
 
-    /// Creates a new uint16 array from a boxed slice.
+    /// Creates a new [`Uint16Array`] from a boxed slice.
     #[inline(always)]
     pub fn new_from_boxed_slice(
         scope: &mut ValueScope<'scope>,
@@ -92,7 +92,7 @@ impl<'scope> Uint16Array<'scope> {
             .seal()
     }
 
-    /// Creates a new uint16 array from a vec.
+    /// Creates a new [`Uint16Array`] from a vec.
     #[inline(always)]
     pub fn new_from_vec(scope: &mut ValueScope<'scope>, data: Vec<u16>) -> Uint16Array<'scope> {
         let mut data = ManuallyDrop::new(data);
@@ -118,7 +118,7 @@ impl<'scope> Uint16Array<'scope> {
             .seal()
     }
 
-    /// Returns the number of elements inside the uint16 array.
+    /// Returns the number of elements inside the [`Uint16Array`].
     #[inline(always)]
     pub fn len(&self) -> usize {
         self.0.byte_length() / std::mem::size_of::<u16>()
@@ -139,7 +139,7 @@ impl<'scope> Uint16Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Uint16Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *const u16;
         assert_eq!(data_ptr as usize % std::mem::align_of::<u16>(), 0);
@@ -157,7 +157,7 @@ impl<'scope> Uint16Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Uint16Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *mut u16;
         assert_eq!(data_ptr as usize % std::mem::align_of::<u16>(), 0);
@@ -166,7 +166,7 @@ impl<'scope> Uint16Array<'scope> {
         unsafe { std::slice::from_raw_parts_mut(data_ptr, length) }
     }
 
-    /// Copy the contents of the uint16 array without the overhead of getting the underlying
+    /// Copy the contents of the [`Uint16Array`] without the overhead of getting the underlying
     /// array buffer.
     ///
     /// Returns the number of **bytes** actually written.

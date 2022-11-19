@@ -2,7 +2,7 @@ use std::{ffi::c_void, mem::ManuallyDrop, ptr::null_mut};
 
 use super::{Seal, Unseal, Value, ValueScope};
 
-/// A float32 array backed by a array buffer.
+/// A [`Float32Array`] backed by a array buffer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Float32Array<'scope>(pub(crate) v8::Local<'scope, v8::Float32Array>);
@@ -57,14 +57,14 @@ pub unsafe extern "C" fn vec_deleter_callback(
 }
 
 impl<'scope> Float32Array<'scope> {
-    /// Creates a new float32 array.
+    /// Creates a new [`Float32Array`].
     #[inline(always)]
     pub fn new(scope: &mut ValueScope<'scope>, length: usize) -> Float32Array<'scope> {
         let data = vec![0f32; length].into_boxed_slice();
         Self::new_from_boxed_slice(scope, data)
     }
 
-    /// Creates a new float32 array from a boxed slice.
+    /// Creates a new [`Float32Array`] from a boxed slice.
     #[inline(always)]
     pub fn new_from_boxed_slice(
         scope: &mut ValueScope<'scope>,
@@ -92,7 +92,7 @@ impl<'scope> Float32Array<'scope> {
             .seal()
     }
 
-    /// Creates a new float32 array from a vec.
+    /// Creates a new [`Float32Array`] from a vec.
     #[inline(always)]
     pub fn new_from_vec(scope: &mut ValueScope<'scope>, data: Vec<f32>) -> Float32Array<'scope> {
         let mut data = ManuallyDrop::new(data);
@@ -118,13 +118,13 @@ impl<'scope> Float32Array<'scope> {
             .seal()
     }
 
-    /// Returns the number of elements inside the float32 array.
+    /// Returns the number of elements inside the [`Float32Array`].
     #[inline(always)]
     pub fn len(&self) -> usize {
         self.0.byte_length() / std::mem::size_of::<f32>()
     }
 
-    /// Returns `true` if the float32 array is empty.
+    /// Returns `true` if the [`Float32Array`] is empty.
     #[inline(always)]
     pub fn is_empty(&self) -> bool {
         (self.0.byte_length() / std::mem::size_of::<f32>()) == 0
@@ -139,7 +139,7 @@ impl<'scope> Float32Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Float32Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *const f32;
         assert_eq!(data_ptr as usize % std::mem::align_of::<f32>(), 0);
@@ -157,7 +157,7 @@ impl<'scope> Float32Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Float32Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *mut f32;
         assert_eq!(data_ptr as usize % std::mem::align_of::<f32>(), 0);
@@ -166,7 +166,7 @@ impl<'scope> Float32Array<'scope> {
         unsafe { std::slice::from_raw_parts_mut(data_ptr, length) }
     }
 
-    /// Copy the contents of the float32 array without the overhead of getting the underlying
+    /// Copy the contents of the [`Float32Array`] without the overhead of getting the underlying
     /// array buffer.
     ///
     /// Returns the number of **bytes** actually written.

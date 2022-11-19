@@ -37,7 +37,7 @@ impl<'scope> TryFrom<Value<'scope>> for ArrayBuffer<'scope> {
 }
 
 impl<'scope> ArrayBuffer<'scope> {
-    /// Creates a new array buffer from the given boxed slice.
+    /// Creates a new [`ArrayBuffer`] from the given boxed slice.
     #[inline(always)]
     pub fn new_from_boxed_slice(
         scope: &mut ValueScope<'scope>,
@@ -47,7 +47,7 @@ impl<'scope> ArrayBuffer<'scope> {
         v8::ArrayBuffer::with_backing_store(scope.unseal(), &store.into()).seal()
     }
 
-    /// Creates a new array buffer from the given Vec.
+    /// Creates a new [`ArrayBuffer`] from the given Vec.
     #[inline(always)]
     pub fn new_from_vec(scope: &mut ValueScope<'scope>, data: Vec<u8>) -> ArrayBuffer<'scope> {
         let store = v8::ArrayBuffer::new_backing_store_from_vec(data);
@@ -60,7 +60,7 @@ impl<'scope> ArrayBuffer<'scope> {
         self.0.byte_length()
     }
 
-    /// Returns `true` if the array buffer is empty.
+    /// Returns `true` if the [`ArrayBuffer`] is empty.
     #[inline(always)]
     pub fn is_empty(&self) -> bool {
         self.0.byte_length() == 0

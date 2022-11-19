@@ -2,7 +2,7 @@ use std::{ffi::c_void, mem::ManuallyDrop, ptr::null_mut};
 
 use super::{Seal, Unseal, Value, ValueScope};
 
-/// A float64 array backed by a array buffer.
+/// A [`Float64Array`] backed by a array buffer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Float64Array<'scope>(pub(crate) v8::Local<'scope, v8::Float64Array>);
@@ -57,14 +57,14 @@ pub unsafe extern "C" fn vec_deleter_callback(
 }
 
 impl<'scope> Float64Array<'scope> {
-    /// Creates a new float64 array.
+    /// Creates a new [`Float64Array`].
     #[inline(always)]
     pub fn new(scope: &mut ValueScope<'scope>, length: usize) -> Float64Array<'scope> {
         let data = vec![0f64; length].into_boxed_slice();
         Self::new_from_boxed_slice(scope, data)
     }
 
-    /// Creates a new float64 array from a boxed slice.
+    /// Creates a new [`Float64Array`] from a boxed slice.
     #[inline(always)]
     pub fn new_from_boxed_slice(
         scope: &mut ValueScope<'scope>,
@@ -92,7 +92,7 @@ impl<'scope> Float64Array<'scope> {
             .seal()
     }
 
-    /// Creates a new float64 array from a vec.
+    /// Creates a new [`Float64Array`] from a vec.
     #[inline(always)]
     pub fn new_from_vec(scope: &mut ValueScope<'scope>, data: Vec<f64>) -> Float64Array<'scope> {
         let mut data = ManuallyDrop::new(data);
@@ -124,7 +124,7 @@ impl<'scope> Float64Array<'scope> {
         self.0.byte_length() / std::mem::size_of::<f64>()
     }
 
-    /// Returns `true` if the float64 array is empty.
+    /// Returns `true` if the [`Float64Array`] is empty.
     #[inline(always)]
     pub fn is_empty(&self) -> bool {
         (self.0.byte_length() / std::mem::size_of::<f64>()) == 0
@@ -139,7 +139,7 @@ impl<'scope> Float64Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Float64Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *const f64;
         assert_eq!(data_ptr as usize % std::mem::align_of::<f64>(), 0);
@@ -157,7 +157,7 @@ impl<'scope> Float64Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Float64Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *mut f64;
         assert_eq!(data_ptr as usize % std::mem::align_of::<f64>(), 0);
@@ -166,7 +166,7 @@ impl<'scope> Float64Array<'scope> {
         unsafe { std::slice::from_raw_parts_mut(data_ptr, length) }
     }
 
-    /// Copy the contents of the float64 array without the overhead of getting the underlying
+    /// Copy the contents of the [`Float64Array`] without the overhead of getting the underlying
     /// array buffer.
     ///
     /// Returns the number of **bytes** actually written.

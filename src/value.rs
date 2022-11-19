@@ -6,6 +6,8 @@ mod array;
 mod array_buffer;
 mod array_buffer_view;
 mod bigint;
+mod bigint64_array;
+mod biguint64_array;
 mod boolean;
 mod data_view;
 mod error;
@@ -34,9 +36,9 @@ mod uint8_clamped_array;
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
-    BigInt64Array, BigIntObject, BigUint64Array, BooleanObject, Date, External, Function, Message,
-    NumberObject, Promise, PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol,
-    SymbolObject, WasmMemoryObject, WasmModuleObject,
+    BigIntObject, BooleanObject, Date, External, Function, Message, NumberObject, Promise,
+    PromiseResolver, Proxy, RegExp, SharedArrayBuffer, StringObject, Symbol, SymbolObject,
+    WasmMemoryObject, WasmModuleObject,
 };
 
 pub use self::{
@@ -44,6 +46,8 @@ pub use self::{
     array_buffer::ArrayBuffer,
     array_buffer_view::ArrayBufferView,
     bigint::BigInt,
+    bigint64_array::BigInt64Array,
+    biguint64_array::BigUint64Array,
     boolean::Boolean,
     data_view::DataView,
     error::Error,

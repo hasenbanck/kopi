@@ -1,6 +1,6 @@
 use super::{Primitive, Seal, Unseal, Value, ValueScope};
 
-/// A big integer.
+/// A BigInt value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct BigInt<'scope>(pub(crate) v8::Local<'scope, v8::BigInt>);
@@ -44,19 +44,19 @@ impl<'scope> From<BigInt<'scope>> for Primitive<'scope> {
 }
 
 impl<'scope> BigInt<'scope> {
-    /// Creates a new big int from the given i64 value.
+    /// Creates a new [`BigInt`] from the given i64 value.
     #[inline(always)]
     pub fn new_from_i64(scope: &mut ValueScope<'scope>, value: i64) -> BigInt<'scope> {
         v8::BigInt::new_from_i64(scope.unseal(), value).seal()
     }
 
-    /// Creates a new big int from the given u64 value.
+    /// Creates a new [`BigInt`] from the given u64 value.
     #[inline(always)]
     pub fn new_from_u64(scope: &mut ValueScope<'scope>, value: u64) -> BigInt<'scope> {
         v8::BigInt::new_from_u64(scope.unseal(), value).seal()
     }
 
-    /// Creates a new big int using the sign bit and the given of words.
+    /// Creates a new [`BigInt`] using the sign bit and the given of words.
     ///
     /// The resulting big int is calculated as:
     ///
@@ -77,14 +77,14 @@ impl<'scope> BigInt<'scope> {
         v8::BigInt::new_from_words(scope.unseal(), sign_bit, words.as_ref()).map(|v| v.seal())
     }
 
-    /// Returns the u64 value of the big int. The second return value signals if the conversion
+    /// Returns the u64 value of the [`BigInt`]. The second return value signals if the conversion
     /// was lossless (`true`) or the value had to be truncated `false`.
     #[inline(always)]
     pub fn value_u64(&self) -> (u64, bool) {
         self.0.u64_value()
     }
 
-    /// Returns the i64 value of the big int. The second return value signals if the conversion
+    /// Returns the i64 value of the [`BigInt`]. The second return value signals if the conversion
     /// was lossless (`true`) or the value had to be truncated `false`.
     #[inline(always)]
     pub fn value_i64(&self) -> (i64, bool) {
@@ -97,7 +97,7 @@ impl<'scope> BigInt<'scope> {
         self.0.word_count()
     }
 
-    /// Writes the words of the big int into the given slice. Returns the sign bit, which will be
+    /// Writes the words of the [`BigInt`] into the given slice. Returns the sign bit, which will be
     /// `true` if this big int is negative. The number will be truncated, if the `words` slice is to
     /// small to hold the full big int.
     ///

@@ -1,6 +1,6 @@
 use super::{Seal, Unseal, Value, ValueScope};
 
-/// A uint8 clamped array backed by a array buffer.
+/// A [`Uint8ClampedArray`] backed by a array buffer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Uint8ClampedArray<'scope>(pub(crate) v8::Local<'scope, v8::Uint8ClampedArray>);
@@ -37,14 +37,14 @@ impl<'scope> TryFrom<Value<'scope>> for Uint8ClampedArray<'scope> {
 }
 
 impl<'scope> Uint8ClampedArray<'scope> {
-    /// Creates a new uint8 clamped array.
+    /// Creates a new [`Uint8ClampedArray`].
     #[inline(always)]
     pub fn new(scope: &mut ValueScope<'scope>, length: usize) -> Uint8ClampedArray<'scope> {
         let data = vec![0u8; length].into_boxed_slice();
         Self::new_from_boxed_slice(scope, data)
     }
 
-    /// Creates a new uint8 clamped array from a boxed slice.
+    /// Creates a new [`Uint8ClampedArray`] from a boxed slice.
     #[inline(always)]
     pub fn new_from_boxed_slice(
         scope: &mut ValueScope<'scope>,
@@ -58,7 +58,7 @@ impl<'scope> Uint8ClampedArray<'scope> {
             .seal()
     }
 
-    /// Creates a new uint8 clamped array from a vec.
+    /// Creates a new [`Uint8ClampedArray`] from a vec.
     #[inline(always)]
     pub fn new_from_vec(
         scope: &mut ValueScope<'scope>,
@@ -78,7 +78,7 @@ impl<'scope> Uint8ClampedArray<'scope> {
         self.0.byte_length()
     }
 
-    /// Returns `true` if the uint8 clamped array is empty.
+    /// Returns `true` if the [`Uint8ClampedArray`] is empty.
     #[inline(always)]
     pub fn is_empty(&self) -> bool {
         self.0.byte_length() == 0

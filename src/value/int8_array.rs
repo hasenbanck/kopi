@@ -2,7 +2,7 @@ use std::{ffi::c_void, mem::ManuallyDrop, ptr::null_mut};
 
 use super::{Seal, Unseal, Value, ValueScope};
 
-/// A int8 array backed by a array buffer.
+/// A [`Int8Array`] backed by a array buffer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Int8Array<'scope>(pub(crate) v8::Local<'scope, v8::Int8Array>);
@@ -57,14 +57,14 @@ pub unsafe extern "C" fn vec_deleter_callback(
 }
 
 impl<'scope> Int8Array<'scope> {
-    /// Creates a new int8 array.
+    /// Creates a new [`Int8Array`].
     #[inline(always)]
     pub fn new(scope: &mut ValueScope<'scope>, length: usize) -> Int8Array<'scope> {
         let data = vec![0i8; length].into_boxed_slice();
         Self::new_from_boxed_slice(scope, data)
     }
 
-    /// Creates a new int8 array from a boxed slice.
+    /// Creates a new [`Int8Array`] from a boxed slice.
     #[inline(always)]
     pub fn new_from_boxed_slice(
         scope: &mut ValueScope<'scope>,
@@ -92,7 +92,7 @@ impl<'scope> Int8Array<'scope> {
             .seal()
     }
 
-    /// Creates a new int8 array from a vec.
+    /// Creates a new [`Int8Array`] from a vec.
     #[inline(always)]
     pub fn new_from_vec(scope: &mut ValueScope<'scope>, data: Vec<i8>) -> Int8Array<'scope> {
         let mut data = ManuallyDrop::new(data);
@@ -124,7 +124,7 @@ impl<'scope> Int8Array<'scope> {
         self.0.byte_length() / std::mem::size_of::<i8>()
     }
 
-    /// Returns `true` if the int8 array is empty.
+    /// Returns `true` if the [`Int8Array`] is empty.
     #[inline(always)]
     pub fn is_empty(&self) -> bool {
         (self.0.byte_length() / std::mem::size_of::<i8>()) == 0
@@ -139,7 +139,7 @@ impl<'scope> Int8Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Int8Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *const i8;
         assert_eq!(data_ptr as usize % std::mem::align_of::<i8>(), 0);
@@ -157,7 +157,7 @@ impl<'scope> Int8Array<'scope> {
         let data_ptr = self
             .0
             .buffer(scope.unseal())
-            .expect("Uint8Array has no backing array buffer")
+            .expect("Int8Array has no backing array buffer")
             .data()
             .wrapping_add(self.0.byte_offset()) as *mut i8;
         assert_eq!(data_ptr as usize % std::mem::align_of::<i8>(), 0);
@@ -166,7 +166,7 @@ impl<'scope> Int8Array<'scope> {
         unsafe { std::slice::from_raw_parts_mut(data_ptr, length) }
     }
 
-    /// Copy the contents of the int8 array without the overhead of getting the underlying
+    /// Copy the contents of the [`Int8Array`] without the overhead of getting the underlying
     /// array buffer.
     ///
     /// Returns the number of **bytes** actually written.

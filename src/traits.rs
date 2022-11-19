@@ -37,9 +37,9 @@ pub trait FastcallArgument: private::Sealed {
     #[doc(hidden)]
     type Value;
 
-    /// The V8 Type that maps to the implementor.
+    /// The V8 type that maps to the implementor.
     #[doc(hidden)]
-    fn v8_type() -> v8::fast_api::Type;
+    const V8_TYPE: v8::fast_api::Type;
 }
 
 /// Trait for types that are supported to be used as return value for fastcall functions.
@@ -48,9 +48,9 @@ pub trait FastcallReturnValue: private::Sealed {
     #[doc(hidden)]
     type Value;
 
-    /// The CType that maps to the implementor.
+    /// The C type that maps to the implementor.
     #[doc(hidden)]
-    fn c_type() -> v8::fast_api::CType;
+    const C_TYPE: v8::fast_api::CType;
 }
 
 macro_rules! fastcall_argument {
@@ -58,10 +58,7 @@ macro_rules! fastcall_argument {
         impl super::FastcallArgument for $value_type {
             type Value = $value_type;
 
-            #[inline(always)]
-            fn v8_type() -> v8::fast_api::Type {
-                v8::fast_api::Type::$v8_type
-            }
+            const V8_TYPE: v8::fast_api::Type = v8::fast_api::Type::$v8_type;
         }
     };
 }
@@ -81,10 +78,7 @@ macro_rules! fastcall_return_value {
         impl super::FastcallReturnValue for $value_type {
             type Value = $value_type;
 
-            #[inline(always)]
-            fn c_type() -> v8::fast_api::CType {
-                v8::fast_api::CType::$c_type
-            }
+            const C_TYPE: v8::fast_api::CType = v8::fast_api::CType::$c_type;
         }
     };
 }

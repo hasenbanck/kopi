@@ -50,7 +50,6 @@ pub mod _macros {
     //! These exports are needed by the `static_function` and `fastcall_function` macro.
     //! They are not supposed to be used by the user.
 
-    pub use once_cell::sync::Lazy;
     pub use v8::{
         fast_api::{CType, FastApiCallbackOptions, FastFunction, Type},
         External, FunctionCallback, FunctionCallbackArguments, HandleScope, Local, MapFnTo, Object,

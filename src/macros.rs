@@ -1,5 +1,16 @@
 //! Implements public visible macros.
 
+/// Helper macro to count arguments.
+///
+/// Can be replaced once the feature "macro_metavar_expr" is stable:
+/// https://github.com/rust-lang/rust/issues/83527
+#[doc(hidden)]
+#[macro_export]
+macro_rules! count {
+    () => (0usize);
+    ( $x:tt $($xs:tt)* ) => (1usize + count!($($xs)*));
+}
+
 /// Macro to implement the [`crate::StaticFunction`] trait. Static functions can be attached to runtimes
 /// to provide build-in functionality.
 ///
@@ -434,7 +445,7 @@ macro_rules! fastcall_function {
 
             fn return_type(&self) -> $crate::_macros::CType {
                 use $crate::FastcallReturnValue;
-                <$return_type>::c_type()
+                <$return_type>::C_TYPE
             }
 
             fn function(&self) -> *const std::ffi::c_void {
@@ -546,7 +557,7 @@ macro_rules! fastcall_function {
         
             fn return_type(&self) -> $crate::_macros::CType {
                 use $crate::FastcallReturnValue;
-                <$return_type>::c_type()
+                <$return_type>::C_TYPE
             }
         
             fn function(&self) -> *const std::ffi::c_void {
@@ -608,15 +619,13 @@ macro_rules! fastcall_function {
         
         impl $crate::_macros::FastFunction for $function_name {
             fn args(&self) -> &'static [$crate::_macros::Type] {
-                static ARGS : $crate::_macros::Lazy<Vec<$crate::_macros::Type>> =
-                    $crate::_macros::Lazy::new(|| {
-                        use $crate::FastcallArgument;
-                        vec![
-                            $crate::_macros::Type::V8Value,
-                            $(<$arg_type>::v8_type(),)*
-                            $crate::_macros::Type::CallbackOptions,
-                        ]
-                    });
+                use $crate::{count, FastcallArgument};
+                
+                static ARGS : [$crate::_macros::Type; 2 + $crate::count!($($arg_type)*)] = [
+                    $crate::_macros::Type::V8Value,
+                    $(<$arg_type>::V8_TYPE,)*
+                    $crate::_macros::Type::CallbackOptions,
+                ];
                 
                 &ARGS
             }
@@ -679,7 +688,7 @@ macro_rules! fastcall_function {
             }
         }
     );
-    (fn $function_name:ident($state_name:ident : &mut $state_type:ty $(,$arg_name:ident : $arg_type:ty)*) -> $return_type:ty $function_block:block ) => (
+    (fn $function_name:ident($state_name:ident : &mut $state_type:ty $(,$arg_name:ident : $arg_type:ty)*) -> $return_type:ty $function_block:block ) => (         
         #[allow(non_camel_case_types)]
         struct $function_name;
         
@@ -692,22 +701,20 @@ macro_rules! fastcall_function {
         
         impl $crate::_macros::FastFunction for $function_name {
             fn args(&self) -> &'static [$crate::_macros::Type] {
-                static ARGS : $crate::_macros::Lazy<Vec<$crate::_macros::Type>> =
-                    $crate::_macros::Lazy::new(|| {
-                        use $crate::FastcallArgument;
-                        vec![
-                            $crate::_macros::Type::V8Value,
-                            $(<$arg_type>::v8_type(),)*
-                            $crate::_macros::Type::CallbackOptions,
-                        ]
-                    });
+                use $crate::{count, FastcallArgument};
+            
+                static ARGS : [$crate::_macros::Type; 2 + $crate::count!($($arg_type)*)] = [
+                    $crate::_macros::Type::V8Value,
+                    $(<$arg_type>::V8_TYPE,)*
+                    $crate::_macros::Type::CallbackOptions,
+                ];
                 
                 &ARGS
             }
         
             fn return_type(&self) -> $crate::_macros::CType {
                 use $crate::FastcallReturnValue;
-                <$return_type>::c_type()
+                <$return_type>::C_TYPE
             }
         
             fn function(&self) -> *const std::ffi::c_void {
@@ -778,15 +785,13 @@ macro_rules! fastcall_function {
         
         impl $crate::_macros::FastFunction for $function_name {
             fn args(&self) -> &'static [$crate::_macros::Type] {
-                static ARGS : $crate::_macros::Lazy<Vec<$crate::_macros::Type>> =
-                    $crate::_macros::Lazy::new(|| {
-                        use $crate::FastcallArgument;
-                        vec![
-                            $crate::_macros::Type::V8Value,
-                            <$first_arg_type>::v8_type(),
-                            $(<$arg_type>::v8_type(),)*
-                        ]
-                    });
+                use $crate::{count, FastcallArgument};
+                
+                static ARGS : [$crate::_macros::Type; 2 + $crate::count!($($arg_type)*)] = [
+                    $crate::_macros::Type::V8Value,
+                    <$first_arg_type>::V8_TYPE,
+                    $(<$arg_type>::V8_TYPE,)*
+                ];
                 
                 &ARGS
             }
@@ -842,22 +847,20 @@ macro_rules! fastcall_function {
         
         impl $crate::_macros::FastFunction for $function_name {
             fn args(&self) -> &'static [$crate::_macros::Type] {
-                static ARGS : $crate::_macros::Lazy<Vec<$crate::_macros::Type>> =
-                    $crate::_macros::Lazy::new(|| {
-                        use $crate::FastcallArgument;
-                        vec![
-                            $crate::_macros::Type::V8Value,
-                            <$first_arg_type>::v8_type(),
-                            $(<$arg_type>::v8_type(),)*
-                        ]
-                    });
+                use $crate::{count, FastcallArgument};
+                
+                static ARGS : [$crate::_macros::Type; 2 + $crate::count!($($arg_type)*)] = [
+                    $crate::_macros::Type::V8Value,
+                    <$first_arg_type>::V8_TYPE,
+                    $(<$arg_type>::V8_TYPE,)*
+                ];
                 
                 &ARGS
             }
         
             fn return_type(&self) -> $crate::_macros::CType {
                 use $crate::FastcallReturnValue;
-                <$return_type>::c_type()
+                <$return_type>::C_TYPE
             }
         
             fn function(&self) -> *const std::ffi::c_void {

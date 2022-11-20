@@ -29,6 +29,7 @@ mod number;
 mod number_object;
 mod object;
 mod primitive;
+mod regexp;
 mod set;
 mod stack_trace;
 mod string;
@@ -44,9 +45,7 @@ mod uint8_clamped_array;
 
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
-pub use v8::{
-    Function, Promise, PromiseResolver, Proxy, RegExp, WasmMemoryObject, WasmModuleObject,
-};
+pub use v8::{Function, Promise, PromiseResolver, Proxy, WasmMemoryObject, WasmModuleObject};
 
 pub use self::{
     array::Array,
@@ -76,6 +75,7 @@ pub use self::{
     number_object::NumberObject,
     object::Object,
     primitive::Primitive,
+    regexp::RegExp,
     set::Set,
     stack_trace::{StackFrame, StackTrace},
     string::{NewStringType, String},

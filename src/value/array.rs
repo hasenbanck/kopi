@@ -69,7 +69,7 @@ impl<'scope> Array<'scope> {
         self.0.get_index(scope.unseal(), pos).map(|v| v.seal())
     }
 
-    // TODO test this error case.
+    // TODO return error in case it fails. What is the error case?
     /// Sets the value at the given array position. Returns `true` if the value could be written.
     ///
     /// # Panics
@@ -79,7 +79,7 @@ impl<'scope> Array<'scope> {
     pub fn set(&self, scope: &mut ValueScope<'scope>, pos: u32, value: Value<'scope>) {
         self.0
             .set_index(scope.unseal(), pos, value.unseal())
-            .expect("Out of bound access");
+            .expect("TODO");
     }
 
     /// Returns the length of the array.

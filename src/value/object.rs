@@ -132,7 +132,7 @@ impl<'scope> Object<'scope> {
     pub fn set_prototype(&self, scope: &mut ValueScope<'scope>, prototype: Value<'scope>) -> bool {
         self.0
             .set_prototype(scope.unseal(), prototype.unseal())
-            .unwrap_or(false)
+            .expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error case?
@@ -151,7 +151,7 @@ impl<'scope> Object<'scope> {
     ) -> bool {
         self.0
             .create_data_property(scope.unseal(), key.unseal(), value.unseal())
-            .unwrap_or(false)
+            .expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error case?
@@ -171,7 +171,7 @@ impl<'scope> Object<'scope> {
     ) -> bool {
         self.0
             .define_own_property(scope.unseal(), key.unseal(), value.unseal(), attr)
-            .unwrap_or(false)
+            .expect("TODO")
     }
 
     /// Returns the value at the given key if present.
@@ -233,14 +233,14 @@ impl<'scope> Object<'scope> {
     /// Returns `true` if the object has the property.
     #[inline(always)]
     pub fn has(&self, scope: &mut ValueScope<'scope>, key: Value<'scope>) -> bool {
-        self.0.has(scope.unseal(), key.unseal()).unwrap_or(false)
+        self.0.has(scope.unseal(), key.unseal()).expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error case?
     /// Returns `true` if there is a value at the given index.
     #[inline(always)]
     pub fn has_index(&self, scope: &mut ValueScope<'scope>, index: u32) -> bool {
-        self.0.has_index(scope.unseal(), index).unwrap_or(false)
+        self.0.has_index(scope.unseal(), index).expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error case?
@@ -251,7 +251,7 @@ impl<'scope> Object<'scope> {
     pub fn has_own_property(&self, scope: &mut ValueScope<'scope>, key: Name<'scope>) -> bool {
         self.0
             .has_own_property(scope.unseal(), key.unseal())
-            .unwrap_or(false)
+            .expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error case?
@@ -260,7 +260,7 @@ impl<'scope> Object<'scope> {
     /// Returns `true` if the value could be deleted.
     #[inline(always)]
     pub fn delete(&self, scope: &mut ValueScope<'scope>, key: Value<'scope>) -> bool {
-        self.0.delete(scope.unseal(), key.unseal()).unwrap_or(false)
+        self.0.delete(scope.unseal(), key.unseal()).expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error case?
@@ -269,7 +269,7 @@ impl<'scope> Object<'scope> {
     /// Returns `true` if the value could be deleted.
     #[inline(always)]
     pub fn delete_index(&self, scope: &mut ValueScope<'scope>, index: u32) -> bool {
-        self.0.delete_index(scope.unseal(), index).unwrap_or(false)
+        self.0.delete_index(scope.unseal(), index).expect("TODO")
     }
 
     /// Returns the number of internal fields for this object.
@@ -302,7 +302,7 @@ impl<'scope> Object<'scope> {
     ) -> bool {
         self.0
             .set_integrity_level(scope.unseal(), level)
-            .unwrap_or(false)
+            .expect("TODO")
     }
 
     /// Sets the value in an internal field.

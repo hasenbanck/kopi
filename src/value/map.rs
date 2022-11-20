@@ -78,14 +78,14 @@ impl<'scope> Map<'scope> {
     /// Returns `true` if the map contains an entry with the given key.
     #[inline(always)]
     pub fn contains_key(&self, scope: &mut ValueScope<'scope>, key: Value<'scope>) -> bool {
-        self.0.has(scope.unseal(), key.unseal()).unwrap_or(false)
+        self.0.has(scope.unseal(), key.unseal()).expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error condition here!?
     /// Remove the entry with the given key. Returns `true` there was something to remove.
     #[inline(always)]
     pub fn remove(&self, scope: &mut ValueScope<'scope>, key: Value<'scope>) -> bool {
-        self.0.delete(scope.unseal(), key.unseal()).unwrap_or(false)
+        self.0.delete(scope.unseal(), key.unseal()).expect("TODO")
     }
 
     /// Returns an array of the map.

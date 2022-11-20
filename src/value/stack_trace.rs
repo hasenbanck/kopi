@@ -1,5 +1,4 @@
-use super::{Seal, Unseal, Value, ValueScope};
-use crate::value::String;
+use super::{Seal, String, Unseal, Value, ValueScope};
 
 /// A stack trace.
 #[derive(Copy, Clone)]

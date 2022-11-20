@@ -1,5 +1,4 @@
-use super::{String, ValueScope};
-use crate::value::{Seal, Unseal, Value};
+use super::{Message, Seal, String, Unseal, Value, ValueScope};
 
 /// Holds the constructors for error values.
 pub struct Error;
@@ -47,13 +46,12 @@ impl Error {
         v8::Exception::type_error(scope.unseal(), message.unseal()).seal()
     }
 
-    // TODO use value::Message
     /// Creates an error message for the given exception.
     #[inline(always)]
     pub fn new_message<'scope>(
         scope: &mut ValueScope<'scope>,
         exception: Value<'scope>,
-    ) -> v8::Local<'scope, v8::Message> {
-        v8::Exception::create_message(scope.unseal(), exception.unseal())
+    ) -> Message<'scope> {
+        v8::Exception::create_message(scope.unseal(), exception.unseal()).seal()
     }
 }

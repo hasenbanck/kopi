@@ -22,6 +22,7 @@ mod int32_array;
 mod int8_array;
 mod integer;
 mod map;
+mod message;
 mod name;
 mod number;
 mod number_object;
@@ -43,8 +44,7 @@ mod uint8_clamped_array;
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
-    External, Function, Message, Promise, PromiseResolver, Proxy, RegExp, WasmMemoryObject,
-    WasmModuleObject,
+    External, Function, Promise, PromiseResolver, Proxy, RegExp, WasmMemoryObject, WasmModuleObject,
 };
 
 pub use self::{
@@ -68,6 +68,7 @@ pub use self::{
     int8_array::Int8Array,
     integer::Integer,
     map::Map,
+    message::Message,
     name::Name,
     number::Number,
     number_object::NumberObject,

@@ -21,6 +21,10 @@ pub struct RuntimeOptions<STATE> {
     pub initial_heap_size: usize,
     /// Sets the maximum size of the heap.
     pub max_heap_size: usize,
+    /// Enables the capturing of the current stack trace when an uncaught exception
+    /// occurs and report it to the message listeners. Sets the limit of how many
+    /// frames are captures.
+    pub capture_stack_trace_for_uncaught_exceptions: Option<i32>,
     /// Extensions add build-in functionality to a runtime.
     pub extensions: Vec<Extension<STATE>>,
 }
@@ -30,6 +34,7 @@ impl<STATE> Default for RuntimeOptions<STATE> {
         Self {
             initial_heap_size: 512 * 1024,    // 512 KiB
             max_heap_size: 512 * 1024 * 1024, // 512 MiB
+            capture_stack_trace_for_uncaught_exceptions: None,
             extensions: vec![],
         }
     }
@@ -69,6 +74,10 @@ impl<STATE> Runtime<STATE> {
         let state_ptr = Rc::as_ptr(&state) as *const RefCell<STATE> as *mut c_void;
 
         let mut isolate = v8::Isolate::new(config);
+
+        if let Some(frame_limit) = options.capture_stack_trace_for_uncaught_exceptions {
+            isolate.set_capture_stack_trace_for_uncaught_exceptions(true, frame_limit.max(0))
+        }
 
         // TODO Test how namespaces are overwritten. Also support "nested" namespaces like "a.b.c".
         let main_context = {

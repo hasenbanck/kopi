@@ -15,9 +15,7 @@ impl Serialize for () {
         Ok(Primitive::new_undefined(scope).into())
     }
 
-    fn is_undefined() -> bool {
-        true
-    }
+    const DEFINED_RETURN_VALUE: bool = false;
 }
 
 impl Serialize for bool {

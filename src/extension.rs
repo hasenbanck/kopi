@@ -80,7 +80,7 @@ pub fn set_result<'scope, R>(
     let scope = scope.seal();
 
     // Some types can skip the serialization, like for example `()`.
-    if !R::is_undefined() {
+    if R::DEFINED_RETURN_VALUE {
         let value = match result.serialize(scope) {
             Ok(value) => value,
             Err(err) => {

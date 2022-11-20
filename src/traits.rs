@@ -9,13 +9,11 @@ pub trait Serialize {
     /// Needs to serialize the given type to a [`Value`].
     fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError>;
 
-    /// Defines if the type is generally `undefined`. Most useful for the `()` type, where we don't
-    /// want to set any return value at all. Standard implementation should be fine for most
-    /// custom implementation.
-    #[inline(always)]
-    fn is_undefined() -> bool {
-        false
-    }
+    /// Defines if the type is generally defined. Most useful for the `()` type, where we don't
+    /// want to set any return value at all and the return value is `undefined`.
+    ///
+    /// Standard implementation should be fine for most custom implementation.
+    const DEFINED_RETURN_VALUE: bool = true;
 }
 
 /// Trait to deserialize a [`Value`] into a Rust value.

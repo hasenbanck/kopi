@@ -14,6 +14,7 @@ mod boolean_object;
 mod data_view;
 mod date;
 mod error;
+mod external;
 mod float32_array;
 mod float64_array;
 mod int16_array;
@@ -44,7 +45,7 @@ mod uint8_clamped_array;
 pub(crate) use string::new_string;
 // TODO wrap all V8 exports.
 pub use v8::{
-    External, Function, Promise, PromiseResolver, Proxy, RegExp, WasmMemoryObject, WasmModuleObject,
+    Function, Promise, PromiseResolver, Proxy, RegExp, WasmMemoryObject, WasmModuleObject,
 };
 
 pub use self::{
@@ -60,6 +61,7 @@ pub use self::{
     data_view::DataView,
     date::Date,
     error::Error,
+    external::External,
     float32_array::Float32Array,
     float64_array::Float64Array,
     int16_array::Int16Array,

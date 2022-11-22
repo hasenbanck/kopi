@@ -56,7 +56,7 @@ impl Serialize for i32 {
 impl Serialize for i64 {
     #[inline(always)]
     fn serialize<'scope>(self, scope: &mut ValueScope<'scope>) -> Result<Value<'scope>, TypeError> {
-        if self > MAX_SAFE_INTEGER || self < MIN_SAFE_INTEGER {
+        if !(MIN_SAFE_INTEGER..=MAX_SAFE_INTEGER).contains(&self) {
             Ok(BigInt::new_from_i64(scope, self).into())
         } else if self > i32::MAX as i64 || self < i32::MIN as i64 {
             Ok(Number::new(scope, self as f64).into())

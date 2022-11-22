@@ -1,7 +1,7 @@
 use crate::{
     error::{create_type_error, TypeError},
     traits::Deserialize,
-    value::{BigInt, Boolean, Int32, Integer, Number, Uint32, Value, ValueScope},
+    value::{BigInt, Boolean, Integer, Number, Value, ValueScope},
 };
 
 impl<'scope> Deserialize<'scope> for () {
@@ -52,14 +52,6 @@ impl<'scope> Deserialize<'scope> for i8 {
             let val = i8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = Int32::try_from(value) {
-            let val = i8::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Uint32::try_from(value) {
-            let val = i8::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an i8", scope, &value))?;
-            Ok(val)
         } else if let Ok(val) = BigInt::try_from(value) {
             let (val, lossless) = val.value_i64();
             if !lossless {
@@ -92,14 +84,6 @@ impl<'scope> Deserialize<'scope> for i16 {
             let val = i16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = Int32::try_from(value) {
-            let val = i16::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Uint32::try_from(value) {
-            let val = i16::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an i16", scope, &value))?;
-            Ok(val)
         } else if let Ok(val) = BigInt::try_from(value) {
             let (val, lossless) = val.value_i64();
             if !lossless {
@@ -129,12 +113,6 @@ impl<'scope> Deserialize<'scope> for i32 {
         value: Value<'scope>,
     ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
-            let val = i32::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an i32", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Int32::try_from(value) {
-            Ok(val.value())
-        } else if let Ok(val) = Uint32::try_from(value) {
             let val = i32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an i32", scope, &value))?;
             Ok(val)
@@ -178,13 +156,6 @@ impl<'scope> Deserialize<'scope> for i64 {
                 ));
             }
             Ok(val)
-        } else if let Ok(val) = Int32::try_from(value) {
-            let val = i64::from(val.value());
-            Ok(val)
-        } else if let Ok(val) = Uint32::try_from(value) {
-            let val = i64::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an i64", scope, &value))?;
-            Ok(val)
         } else {
             Err(create_type_error(
                 "Value can't be converted to an i64",
@@ -202,14 +173,6 @@ impl<'scope> Deserialize<'scope> for u8 {
         value: Value<'scope>,
     ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
-            let val = u8::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Uint32::try_from(value) {
-            let val = u8::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Int32::try_from(value) {
             let val = u8::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u8", scope, &value))?;
             Ok(val)
@@ -245,14 +208,6 @@ impl<'scope> Deserialize<'scope> for u16 {
             let val = u16::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
             Ok(val)
-        } else if let Ok(val) = Int32::try_from(value) {
-            let val = u16::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Uint32::try_from(value) {
-            let val = u16::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an u16", scope, &value))?;
-            Ok(val)
         } else if let Ok(val) = BigInt::try_from(value) {
             let (val, lossless) = val.value_u64();
             if !lossless {
@@ -282,12 +237,6 @@ impl<'scope> Deserialize<'scope> for u32 {
         value: Value<'scope>,
     ) -> Result<Self, TypeError> {
         if let Ok(val) = Integer::try_from(value) {
-            let val = u32::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an u32", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Uint32::try_from(value) {
-            Ok(val.value())
-        } else if let Ok(val) = Int32::try_from(value) {
             let val = u32::try_from(val.value())
                 .map_err(|_| create_type_error("Value not in range for an u32", scope, &value))?;
             Ok(val)
@@ -332,14 +281,6 @@ impl<'scope> Deserialize<'scope> for u64 {
                     &value,
                 ));
             }
-            Ok(val)
-        } else if let Ok(val) = Uint32::try_from(value) {
-            let val = u64::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an u64", scope, &value))?;
-            Ok(val)
-        } else if let Ok(val) = Int32::try_from(value) {
-            let val = u64::try_from(val.value())
-                .map_err(|_| create_type_error("Value not in range for an u64", scope, &value))?;
             Ok(val)
         } else {
             Err(create_type_error(

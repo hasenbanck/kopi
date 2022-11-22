@@ -52,7 +52,30 @@ impl<'scope> Date<'scope> {
 
     /// Returns the value of the date (milliseconds elapsed since January 1, 1970 00:00:00 UTC).
     #[inline(always)]
-    pub fn value_of(&self) -> f64 {
+    pub fn value(&self) -> f64 {
         self.0.value_of()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::value::{test::test_value, Date};
+
+    // TODO write a test fixture to test constructors.
+
+    #[test]
+    fn value() {
+        test_value("new Date(0)", |v| {
+            let v = Date::try_from(v).expect("Not a Date");
+            assert_eq!(v.value(), 0.0);
+        });
+        test_value("new Date('1995-12-17T03:24:00')", |v| {
+            let v = Date::try_from(v).expect("Not a Date");
+            assert_eq!(v.value(), 819167040000.0);
+        });
+        test_value("new Date('2020-05-12T23:50:21.817Z')", |v| {
+            let v = Date::try_from(v).expect("Not a Date");
+            assert_eq!(v.value(), 1589327421817.0);
+        });
     }
 }

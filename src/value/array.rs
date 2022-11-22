@@ -1,4 +1,4 @@
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{Object, Seal, Unseal, Value, ValueScope};
 
 /// An array.
 #[derive(Copy, Clone)]
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for Array<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Array>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Array<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: Array<'scope>) -> Self {
+        Object(value.0.into())
     }
 }
 

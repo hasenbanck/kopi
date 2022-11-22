@@ -1,9 +1,4 @@
-use std::ffi::c_void;
-
-use super::{Seal, Unseal, Value, ValueScope};
-
-// TODO rework this type and make it safer to use, once we know how the interface / API for embedded
-//      types should look like.
+use super::{Seal, Unseal, Value};
 
 /// A value that wraps an external data pointer.
 #[derive(Copy, Clone)]
@@ -38,18 +33,5 @@ impl<'scope> TryFrom<Value<'scope>> for External<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::External>::try_from(value.0)?;
         Ok(Self(inner))
-    }
-}
-
-impl<'scope> External<'scope> {
-    /// Creates a new [`External`].
-    #[inline(always)]
-    pub fn new(scope: &mut ValueScope<'scope>, value: *mut c_void) -> External<'scope> {
-        v8::External::new(scope.unseal(), value).seal()
-    }
-
-    /// Returns the pointer to the external data.
-    pub fn value(&self) -> *mut c_void {
-        self.0.value()
     }
 }

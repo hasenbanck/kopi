@@ -1,4 +1,4 @@
-use super::{Number, Seal, Unseal, Value, ValueScope};
+use super::{Number, Primitive, Seal, Unseal, Value, ValueScope};
 
 /// A signed integer value.
 #[derive(Copy, Clone)]
@@ -36,6 +36,13 @@ impl<'scope> TryFrom<Value<'scope>> for Integer<'scope> {
     }
 }
 
+impl<'scope> From<Integer<'scope>> for Primitive<'scope> {
+    #[inline(always)]
+    fn from(value: Integer<'scope>) -> Self {
+        Primitive(value.0.into())
+    }
+}
+
 impl<'scope> From<Integer<'scope>> for Number<'scope> {
     #[inline(always)]
     fn from(value: Integer<'scope>) -> Self {
@@ -60,5 +67,24 @@ impl<'scope> Integer<'scope> {
     #[inline(always)]
     pub fn value(&self) -> i64 {
         self.0.value()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::value::{test::test_value, Integer};
+
+    // TODO write a test fixture to test constructors.
+
+    #[test]
+    fn value() {
+        test_value("42", |v| {
+            let i = Integer::try_from(v).expect("Not an integer");
+            assert_eq!(i.value(), 42);
+        });
+        test_value("-100", |v| {
+            let i = Integer::try_from(v).expect("Not an integer");
+            assert_eq!(i.value(), -100);
+        });
     }
 }

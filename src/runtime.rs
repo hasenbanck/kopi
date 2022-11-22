@@ -40,7 +40,7 @@ impl<STATE> Default for RuntimeOptions<STATE> {
     }
 }
 
-/// The runtime runs ECMAScript code inside a V8 engine.
+/// The runtime that runs ECMAScript code inside the V8 engine.
 pub struct Runtime<STATE> {
     isolate: v8::OwnedIsolate,
     main_context: v8::Global<v8::Context>,
@@ -51,8 +51,8 @@ pub struct Runtime<STATE> {
 impl<STATE> Drop for Runtime<STATE> {
     fn drop(&mut self) {
         // We want to make sure that nothing will run inside the isolate, since
-        // the pointer to the state inside the isolate will be invalid after
-        // the drop (stored in slot STATE_DATA_SLOT).
+        // the pointer to the state inside the isolate and closures would be invalid
+        // after the drop (stored in slot STATE_DATA_SLOT).
         self.isolate.terminate_execution();
     }
 }
@@ -237,12 +237,12 @@ impl<STATE> Runtime<STATE> {
 
         let Some(script) = v8::Script::compile(try_catch_scope, source, None) else {
             let exception = try_catch_scope.exception();
-            return create_error_from_exception(try_catch_scope, exception);
+            return Err(create_error_from_exception(try_catch_scope, exception));
         };
 
         let Some(v8_value) = script.run(try_catch_scope) else {
             let exception = try_catch_scope.exception();
-            return create_error_from_exception(try_catch_scope, exception);
+            return Err(create_error_from_exception(try_catch_scope, exception));
         };
 
         T::deserialize(try_catch_scope.seal(), v8_value.seal()).map_err(Error::Type)
@@ -357,8 +357,8 @@ mod test {
             Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
         let ret: Result<(), Error> = runtime.execute("var = let");
-        let err = ret.expect_err("Expected an EcmaScript error");
-        assert!(matches!(err, Error::EcmaScript { .. }))
+        let err = ret.expect_err("Expected an Script error");
+        assert!(matches!(err, Error::Script { .. }))
     }
 
     #[test]
@@ -368,8 +368,8 @@ mod test {
             Runtime::new(RuntimeOptions::default(), ()).expect("Can't create runtime");
 
         let ret: Result<(), Error> = runtime.execute("unknown_function()");
-        let err = ret.expect_err("Expected an EcmaScript error");
-        assert!(matches!(err, Error::EcmaScript { .. }))
+        let err = ret.expect_err("Expected an Script error");
+        assert!(matches!(err, Error::Script { .. }))
     }
 
     #[test]

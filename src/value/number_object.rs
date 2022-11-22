@@ -1,4 +1,4 @@
-use super::{Seal, Unseal, Value};
+use super::{Object, Seal, Unseal, Value};
 
 /// A number object.
 #[derive(Copy, Clone)]
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for NumberObject<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::NumberObject>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<NumberObject<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: NumberObject<'scope>) -> Self {
+        Object(value.0.into())
     }
 }
 

@@ -11,8 +11,8 @@ macro_rules! count {
     ( $x:tt $($xs:tt)* ) => (1usize + count!($($xs)*));
 }
 
-/// Macro to implement the [`crate::StaticFunction`] trait. Static functions can be attached to runtimes
-/// to provide build-in functionality.
+/// Macro to implement the [`crate::StaticFunction`] trait. Static functions can be attached to
+/// runtimes to provide build-in functionality.
 ///
 /// When given as the first argument, the function can also mutate the runtime state.
 /// 

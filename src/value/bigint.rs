@@ -56,6 +56,7 @@ impl<'scope> BigInt<'scope> {
         v8::BigInt::new_from_u64(scope.unseal(), value).seal()
     }
 
+    // TODO handle the error.
     /// Creates a new [`BigInt`] using the sign bit and the given of words.
     ///
     /// The resulting big int is calculated as:
@@ -101,7 +102,7 @@ impl<'scope> BigInt<'scope> {
     /// `true` if this big int is negative. The number will be truncated, if the `words` slice is to
     /// small to hold the full big int.
     ///
-    /// Use [`word_count`()] to get the required size.
+    /// Use [`BigInt::word_count`()] to get the required size.
     #[inline]
     pub fn value_words<W>(&self, mut words: W) -> bool
     where

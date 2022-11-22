@@ -61,9 +61,7 @@ macro_rules! fastcall_argument {
     };
 }
 
-// TODO V8 also supports:
-//      * pointer to an embedder type
-//      * JavaScript array of primitive types
+// TODO Support pointer to an embedder type (expose as &mut T where T: EmbedderTrait).
 
 fastcall_argument!(bool, Bool);
 fastcall_argument!(i32, Int32);

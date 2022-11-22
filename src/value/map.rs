@@ -1,4 +1,4 @@
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{Object, Seal, Unseal, Value, ValueScope};
 use crate::value::Array;
 
 /// A hash map.
@@ -34,6 +34,13 @@ impl<'scope> TryFrom<Value<'scope>> for Map<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Map>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Map<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: Map<'scope>) -> Self {
+        Object(value.0.into())
     }
 }
 

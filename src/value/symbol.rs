@@ -1,4 +1,4 @@
-use super::{Name, Seal, String, Unseal, Value, ValueScope};
+use super::{Name, Primitive, Seal, String, Unseal, Value, ValueScope};
 
 /// A symbol value.
 #[derive(Copy, Clone)]
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for Symbol<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Symbol>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Symbol<'scope>> for Primitive<'scope> {
+    #[inline(always)]
+    fn from(value: Symbol<'scope>) -> Self {
+        Primitive(value.0.into())
     }
 }
 

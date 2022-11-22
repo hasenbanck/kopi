@@ -1,6 +1,8 @@
-use super::{Seal, Unseal, Value};
+use super::{Object, Seal, Unseal, Value};
 
-/// A super class for "views" on top of array buffers. Can either be a data view or a typed array.
+/// A super class for "views" on top of array buffers.
+///
+/// Can either be a data view or a typed array.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct ArrayBufferView<'scope>(pub(crate) v8::Local<'scope, v8::ArrayBufferView>);
@@ -33,5 +35,12 @@ impl<'scope> TryFrom<Value<'scope>> for ArrayBufferView<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::ArrayBufferView>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<ArrayBufferView<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: ArrayBufferView<'scope>) -> Self {
+        Object(value.0.into())
     }
 }

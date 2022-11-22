@@ -41,13 +41,13 @@ impl<'scope> StackTrace<'scope> {
 
     /// Returns the number of frames inside the strack trace.
     #[inline(always)]
-    pub fn get_frame_count(&self) -> usize {
+    pub fn frame_count(&self) -> usize {
         self.0.get_frame_count()
     }
 
     /// Returns the stack frame of a stack trace at the particular index.
     #[inline(always)]
-    pub fn get_stack_frame(
+    pub fn stack_frame(
         &mut self,
         scope: &mut ValueScope<'scope>,
         index: usize,

@@ -1,6 +1,6 @@
 use std::{ffi::c_void, mem::ManuallyDrop, ptr::null_mut};
 
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{ArrayBufferView, Object, Seal, TypedArray, Unseal, Value, ValueScope};
 
 /// A BigUint64Array backed by a array buffer.
 #[derive(Copy, Clone)]
@@ -35,6 +35,27 @@ impl<'scope> TryFrom<Value<'scope>> for BigUint64Array<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::BigUint64Array>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<BigUint64Array<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: BigUint64Array<'scope>) -> Self {
+        Object(value.0.into())
+    }
+}
+
+impl<'scope> From<BigUint64Array<'scope>> for ArrayBufferView<'scope> {
+    #[inline(always)]
+    fn from(value: BigUint64Array<'scope>) -> Self {
+        ArrayBufferView(value.0.into())
+    }
+}
+
+impl<'scope> From<BigUint64Array<'scope>> for TypedArray<'scope> {
+    #[inline(always)]
+    fn from(value: BigUint64Array<'scope>) -> Self {
+        TypedArray(value.0.into())
     }
 }
 

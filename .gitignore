@@ -1,4 +1,5 @@
 /.idea
 /target
+/v8_mirror
 Cargo.lock
 *.dat

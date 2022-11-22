@@ -1,6 +1,6 @@
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{ArrayBufferView, Object, Seal, TypedArray, Unseal, Value, ValueScope};
 
-/// A [`Uint8Array`] backed by a array buffer.
+/// A Uint8Array backed by a array buffer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Uint8Array<'scope>(pub(crate) v8::Local<'scope, v8::Uint8Array>);
@@ -33,6 +33,27 @@ impl<'scope> TryFrom<Value<'scope>> for Uint8Array<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Uint8Array>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Uint8Array<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: Uint8Array<'scope>) -> Self {
+        Object(value.0.into())
+    }
+}
+
+impl<'scope> From<Uint8Array<'scope>> for ArrayBufferView<'scope> {
+    #[inline(always)]
+    fn from(value: Uint8Array<'scope>) -> Self {
+        ArrayBufferView(value.0.into())
+    }
+}
+
+impl<'scope> From<Uint8Array<'scope>> for TypedArray<'scope> {
+    #[inline(always)]
+    fn from(value: Uint8Array<'scope>) -> Self {
+        TypedArray(value.0.into())
     }
 }
 

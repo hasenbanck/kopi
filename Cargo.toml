@@ -43,5 +43,5 @@ overflow-checks = true
 [profile.dev.package."*"]
 opt-level = 2
 
-#[patch.crates-io]
-#v8 = { path = "../rusty_v8" }
+[patch.crates-io]
+v8 = { path = "../rusty_v8" }

@@ -84,7 +84,7 @@ pub fn set_result<'scope, R>(
         let value = match result.serialize(scope) {
             Ok(value) => value,
             Err(err) => {
-                let msg = value::String::new(scope, String::from(err), NewStringType::Normal);
+                let msg = value::String::new(scope, err.msg, NewStringType::Normal);
                 value::Error::new_type_error(scope, msg)
             }
         };
@@ -110,7 +110,7 @@ where
     return match A::deserialize(scope, local_value.seal()) {
         Ok(arg) => Some(arg),
         Err(err) => {
-            let msg = value::String::new(scope, &String::from(err), NewStringType::Normal);
+            let msg = value::String::new(scope, err.msg, NewStringType::Normal);
             let error = value::Error::new_type_error(scope, msg);
             rv.set(error.unseal());
             None

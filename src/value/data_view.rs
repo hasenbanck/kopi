@@ -1,4 +1,4 @@
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{ArrayBufferView, Object, Seal, Unseal, Value, ValueScope};
 
 /// A data view into an array buffer.
 #[derive(Copy, Clone)]
@@ -33,6 +33,20 @@ impl<'scope> TryFrom<Value<'scope>> for DataView<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::DataView>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<DataView<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: DataView<'scope>) -> Self {
+        Object(value.0.into())
+    }
+}
+
+impl<'scope> From<DataView<'scope>> for ArrayBufferView<'scope> {
+    #[inline(always)]
+    fn from(value: DataView<'scope>) -> Self {
+        ArrayBufferView(value.0.into())
     }
 }
 

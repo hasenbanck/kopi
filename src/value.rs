@@ -1,6 +1,11 @@
 //! Values that the engine uses.
 //!
-//! The API is optimized to be used in the [`Serialize`] and [`Deserialize`] traits.
+//! The API is optimized to be used in the [`crate::Serialize`] and [`crate::Deserialize`] traits.
+//!
+//! Extension functions are not supposed to work on the values that the engine uses.
+//!
+//! If functionality should be provided on engine types, these should be implemented using
+//! ECMAScript modules.
 
 mod array;
 mod array_buffer;
@@ -17,6 +22,7 @@ mod error;
 mod external;
 mod float32_array;
 mod float64_array;
+mod function;
 mod int16_array;
 mod int32;
 mod int32_array;
@@ -29,6 +35,9 @@ mod number;
 mod number_object;
 mod object;
 mod primitive;
+mod promise;
+mod promise_resolver;
+mod proxy;
 mod regexp;
 mod set;
 mod stack_trace;
@@ -42,10 +51,10 @@ mod uint32;
 mod uint32_array;
 mod uint8_array;
 mod uint8_clamped_array;
+mod wasm_memory_object;
+mod wasm_module_object;
 
 pub(crate) use string::new_string;
-// TODO wrap all V8 exports.
-pub use v8::{Function, Promise, PromiseResolver, Proxy, WasmMemoryObject, WasmModuleObject};
 
 pub use self::{
     array::Array,
@@ -63,6 +72,7 @@ pub use self::{
     external::External,
     float32_array::Float32Array,
     float64_array::Float64Array,
+    function::Function,
     int16_array::Int16Array,
     int32::Int32,
     int32_array::Int32Array,
@@ -75,6 +85,9 @@ pub use self::{
     number_object::NumberObject,
     object::Object,
     primitive::Primitive,
+    promise::{Promise, PromiseState},
+    promise_resolver::PromiseResolver,
+    proxy::Proxy,
     regexp::RegExp,
     set::Set,
     stack_trace::{StackFrame, StackTrace},
@@ -88,9 +101,10 @@ pub use self::{
     uint32_array::Uint32Array,
     uint8_array::Uint8Array,
     uint8_clamped_array::Uint8ClampedArray,
+    wasm_memory_object::WasmMemoryObject,
+    wasm_module_object::WasmModuleObject,
 };
 
-// TODO add From for all subclasses to their superclass.
 // TODO test the methods if they function as expected.
 
 /// Trait for sealing private types. `T` is the public type into which the private type is sealed.
@@ -183,8 +197,43 @@ impl<'scope> Value<'scope> {
 }
 
 #[cfg(test)]
-mod test {
-    use super::{Value, ValueScope};
+pub(crate) mod test {
+    use super::{new_string, NewStringType, Seal, Value, ValueScope};
+    use crate::{error::create_error_from_exception, initialize_with_defaults};
+
+    pub(crate) fn test_value<SOURCE, F>(source: SOURCE, test: F)
+    where
+        SOURCE: AsRef<str>,
+        F: for<'scope> FnOnce(Value<'scope>),
+    {
+        let source = source.as_ref();
+
+        initialize_with_defaults();
+
+        let isolate = &mut v8::Isolate::new(v8::CreateParams::default());
+        let isolate_scope = &mut v8::HandleScope::new(isolate);
+        let global_template = v8::ObjectTemplate::new(isolate_scope);
+        let global_context = v8::Context::new_from_template(isolate_scope, global_template);
+        let global_context_scope = &mut v8::ContextScope::new(isolate_scope, global_context);
+
+        let source = new_string(global_context_scope, source, NewStringType::Normal);
+
+        let try_catch_scope = &mut v8::TryCatch::new(global_context_scope);
+
+        let Some(script) = v8::Script::compile(try_catch_scope, source, None) else {
+            let exception = try_catch_scope.exception();
+            let err = create_error_from_exception(try_catch_scope, exception);
+            panic!("Can't compile script: {}", err);
+        };
+
+        let Some(v8_value) = script.run(try_catch_scope) else {
+            let exception = try_catch_scope.exception();
+            let err = create_error_from_exception(try_catch_scope, exception);
+            panic!("Can't run script: {}", err);
+        };
+
+        test(v8_value.seal())
+    }
 
     #[test]
     fn transparent_representation_value_scope() {

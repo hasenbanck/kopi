@@ -1,7 +1,7 @@
 # Kopi
 
-Kopi is a small abstraction to easily and safely embed an ECMAScript execution
-engine inside a Rust based application. It uses the V8 execution engine to
+Kopi is a small abstraction to easily and safely embed an ECMAScript runtime
+inside a Rust based application. It uses the V8 execution engine to
 provide JITed ECMAScript execution and aims to use very few dependencies.
 
 ## Status ##
@@ -33,7 +33,7 @@ fastcall_function! {
     }
 }
 
-initialize_v8(InitializationOptions::default());
+initialize_with_defaults();
 
 let mut extension = Extension::new(None);
 extension.add_function("madd", move |(a, b, c): (f32, f32, f32)| a + (b * c));

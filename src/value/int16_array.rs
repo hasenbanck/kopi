@@ -1,8 +1,8 @@
 use std::{ffi::c_void, mem::ManuallyDrop, ptr::null_mut};
 
-use super::{Seal, Unseal, Value, ValueScope};
+use super::{ArrayBufferView, Object, Seal, TypedArray, Unseal, Value, ValueScope};
 
-/// A [`Int16Array`] backed by a array buffer.
+/// A Int16Array backed by a array buffer.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Int16Array<'scope>(pub(crate) v8::Local<'scope, v8::Int16Array>);
@@ -35,6 +35,27 @@ impl<'scope> TryFrom<Value<'scope>> for Int16Array<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Int16Array>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Int16Array<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: Int16Array<'scope>) -> Self {
+        Object(value.0.into())
+    }
+}
+
+impl<'scope> From<Int16Array<'scope>> for ArrayBufferView<'scope> {
+    #[inline(always)]
+    fn from(value: Int16Array<'scope>) -> Self {
+        ArrayBufferView(value.0.into())
+    }
+}
+
+impl<'scope> From<Int16Array<'scope>> for TypedArray<'scope> {
+    #[inline(always)]
+    fn from(value: Int16Array<'scope>) -> Self {
+        TypedArray(value.0.into())
     }
 }
 

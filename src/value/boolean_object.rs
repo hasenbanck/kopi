@@ -1,4 +1,4 @@
-use super::{Seal, Unseal, Value};
+use super::{Object, Seal, Unseal, Value};
 
 /// A boolean object.
 #[derive(Copy, Clone)]
@@ -33,6 +33,13 @@ impl<'scope> TryFrom<Value<'scope>> for BooleanObject<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::BooleanObject>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<BooleanObject<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: BooleanObject<'scope>) -> Self {
+        Object(value.0.into())
     }
 }
 

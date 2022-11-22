@@ -7,13 +7,13 @@ use crate::value::{Value, ValueScope};
 /// Errors that the crate can throw.
 #[derive(Debug)]
 pub enum Error {
+    /// The V8 engine was expected to be initialized before calling this functionality.
+    V8NotInitialized,
+    /// An script error.
+    Script(String),
     /// A general type error (e.g. when type conversion failed or an unexpected tape in in argument
     /// or return value was encountered).
     Type(TypeError),
-    /// The V8 engine was expected to be initialized before calling this functionality.
-    V8NotInitialized,
-    /// An EcmaScript error.
-    EcmaScript(String),
     /// An implementation specific error occurred.
     Internal(String),
 }
@@ -21,9 +21,9 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Error::Type(err) => write!(f, "Type error: {}", err),
             Error::V8NotInitialized => write!(f, "V8 engine is not initialized"),
-            Error::EcmaScript(msg) => write!(f, "ECMAScript error: {}", msg),
+            Error::Script(msg) => write!(f, "Script error: {}", msg),
+            Error::Type(err) => write!(f, "Type error: {}", err),
             Error::Internal(msg) => write!(f, "Internal error: {}", msg),
         }
     }
@@ -42,12 +42,6 @@ pub struct TypeError {
 impl std::fmt::Display for TypeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.msg)
-    }
-}
-
-impl From<TypeError> for String {
-    fn from(te: TypeError) -> Self {
-        format!("{}", te.msg)
     }
 }
 
@@ -93,12 +87,12 @@ where
 }
 
 /// Creates an error from an exception.
-pub(crate) fn create_error_from_exception<T>(
+pub(crate) fn create_error_from_exception(
     scope: &mut v8::HandleScope,
     exception: Option<v8::Local<v8::Value>>,
-) -> Result<T, Error> {
+) -> Error {
     let Some(exception) = exception else {
-        return Err(Error::Internal("Exception was not set".to_string()));
+        return Error::Internal("Exception was not set".to_string());
     };
 
     let msg = v8::Exception::create_message(scope, exception);
@@ -110,5 +104,5 @@ pub(crate) fn create_error_from_exception<T>(
 
     let formatted = format!("'{}' in line: {}", message_string, line_number);
 
-    Err(Error::EcmaScript(formatted))
+    Error::Script(formatted)
 }

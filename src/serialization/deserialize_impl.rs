@@ -4,16 +4,6 @@ use crate::{
     value::{BigInt, Boolean, Int32, Integer, Number, Uint32, Value, ValueScope},
 };
 
-impl<'scope> Deserialize<'scope> for Value<'scope> {
-    #[inline(always)]
-    fn deserialize(
-        _scope: &mut ValueScope<'scope>,
-        value: Value<'scope>,
-    ) -> Result<Self, TypeError> {
-        Ok(value)
-    }
-}
-
 impl<'scope> Deserialize<'scope> for () {
     #[inline(always)]
     fn deserialize(

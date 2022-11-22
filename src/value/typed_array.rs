@@ -1,6 +1,6 @@
-use super::{Seal, Unseal, Value};
+use super::{ArrayBufferView, Object, Seal, Unseal, Value};
 
-/// A super class for "views" into array buffers of specific typed value.
+/// A super class for "views" into array buffers of a specific typed value.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct TypedArray<'scope>(pub(crate) v8::Local<'scope, v8::TypedArray>);
@@ -33,5 +33,19 @@ impl<'scope> TryFrom<Value<'scope>> for TypedArray<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::TypedArray>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<TypedArray<'scope>> for Object<'scope> {
+    #[inline(always)]
+    fn from(value: TypedArray<'scope>) -> Self {
+        Object(value.0.into())
+    }
+}
+
+impl<'scope> From<TypedArray<'scope>> for ArrayBufferView<'scope> {
+    #[inline(always)]
+    fn from(value: TypedArray<'scope>) -> Self {
+        ArrayBufferView(value.0.into())
     }
 }

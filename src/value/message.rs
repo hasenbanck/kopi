@@ -30,7 +30,7 @@ impl<'scope> Message<'scope> {
     ///
     /// By default stack traces are not captured for uncaught exceptions.
     /// Can be activated by setting `capture_stack_trace_for_uncaught_exceptions` of
-    /// the [`RuntimeOptions`] to some value.
+    /// the [`crate::RuntimeOptions`] to some value.
     #[inline(always)]
     pub fn stack_trace(&self, scope: &mut ValueScope<'scope>) -> Option<StackTrace<'scope>> {
         self.0.get_stack_trace(scope.unseal()).map(|s| s.seal())

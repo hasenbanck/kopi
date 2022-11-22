@@ -1,6 +1,6 @@
-//! Safe API to embed an ECMAScript engine.
+//! Safe API to embed a ECMAScript runtime.
 //!
-//! Uses the V8 runtime to let the user embed ECMAScript in their application.
+//! Uses the V8 engine to let the user embed ECMAScript in their application.
 //!
 //! # Example
 //!
@@ -196,7 +196,7 @@ pub enum ExecutionModel {
 
 /// Initialized the V8 engine with the default configuration.
 ///
-/// `initialize()` or `initialize_with_defaults` Need to be called once before creating
+/// [`initialize()`] or [`initialize_with_defaults()`] need to be called once before creating
 /// a runtime. Subsequent calls will result in a NOP.
 ///
 /// # Panics
@@ -209,7 +209,7 @@ pub fn initialize_with_defaults() {
 
 /// Initialized the V8 engine.
 ///
-/// `initialize()` or `initialize_with_defaults` Need to be called once before creating
+/// [`initialize()`] or [`initialize_with_defaults()`] need to be called once before creating
 /// a runtime. Subsequent calls will result in a NOP.
 ///
 /// # Panics

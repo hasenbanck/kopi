@@ -56,3 +56,20 @@ impl<'scope> Boolean<'scope> {
         self.0.is_true()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::value::{test::test_value, Boolean};
+
+    #[test]
+    fn value() {
+        test_value("true", |v| {
+            let b = Boolean::try_from(v).expect("Not a boolean");
+            assert!(b.value());
+        });
+        test_value("false", |v| {
+            let b = Boolean::try_from(v).expect("Not a boolean");
+            assert!(!b.value());
+        });
+    }
+}

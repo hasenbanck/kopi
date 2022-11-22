@@ -94,8 +94,6 @@ impl<'scope> Object<'scope> {
 
     // TODO return error in case it fails.
     /// Sets the value at the given key.
-    ///
-    /// Returns `false` if the value could not be set.
     #[inline(always)]
     pub fn set(
         &self,
@@ -105,13 +103,11 @@ impl<'scope> Object<'scope> {
     ) -> bool {
         self.0
             .set(scope.unseal(), key.unseal(), value.unseal())
-            .unwrap_or(false)
+            .expect("TODO")
     }
 
     // TODO return error in case it fails.
     /// Sets the value at the given index.
-    ///
-    /// Returns `false` if the value could not be set.
     #[inline(always)]
     pub fn set_index(
         &self,
@@ -121,13 +117,11 @@ impl<'scope> Object<'scope> {
     ) -> bool {
         self.0
             .set_index(scope.unseal(), index, value.unseal())
-            .unwrap_or(false)
+            .expect("TODO")
     }
 
     // TODO return error in case it fails. What is the error case?
     /// Set the prototype object.
-    ///
-    /// Returns `false` if the prototype could not be set.
     #[inline(always)]
     pub fn set_prototype(&self, scope: &mut ValueScope<'scope>, prototype: Value<'scope>) -> bool {
         self.0
@@ -140,8 +134,6 @@ impl<'scope> Object<'scope> {
     ///
     /// Defines a configurable, writable, enumerable property with the given value on the object
     /// unless the property already exists and is not configurable or the object is not extensible.
-    ///
-    /// Returns `false` on failure.
     #[inline(always)]
     pub fn create_data_property(
         &self,
@@ -159,8 +151,6 @@ impl<'scope> Object<'scope> {
     ///
     /// In general, [`Object::create_data_property()`] will be faster, however, does not allow for
     /// specifying attributes.
-    ///
-    /// Returns `false` on failure.
     #[inline(always)]
     pub fn define_own_property(
         &self,
@@ -188,7 +178,7 @@ impl<'scope> Object<'scope> {
 
     /// Returns the prototype object if present.
     #[inline(always)]
-    pub fn get_prototype(&self, scope: &mut ValueScope<'scope>) -> Option<Value<'scope>> {
+    pub fn prototype(&self, scope: &mut ValueScope<'scope>) -> Option<Value<'scope>> {
         self.0.get_prototype(scope.unseal()).map(|v| v.seal())
     }
 
@@ -197,14 +187,14 @@ impl<'scope> Object<'scope> {
     ///
     /// The hash is not guaranteed to be unique.
     #[inline(always)]
-    pub fn get_identity_hash(&self) -> NonZeroI32 {
+    pub fn identity_hash(&self) -> NonZeroI32 {
         self.0.get_identity_hash()
     }
 
-    /// This function has the same functionality as [`Object::get_property_names()`] but the
+    /// This function has the same functionality as [`Object::property_names()`] but the
     /// returned array doesn't contain the names of properties from prototype objects.
     #[inline(always)]
-    pub fn get_own_property_names(
+    pub fn own_property_names(
         &self,
         scope: &mut ValueScope<'scope>,
         args: GetPropertyNamesArgs,
@@ -217,7 +207,7 @@ impl<'scope> Object<'scope> {
     /// Returns an array containing the names of the filtered properties of this
     /// object, including properties from prototype objects.
     #[inline(always)]
-    pub fn get_property_names(
+    pub fn property_names(
         &self,
         scope: &mut ValueScope<'scope>,
         args: GetPropertyNamesArgs,
@@ -278,9 +268,9 @@ impl<'scope> Object<'scope> {
         self.0.internal_field_count()
     }
 
-    /// Gets the value from a internal field if present.
+    /// Returns the value from a internal field if present.
     #[inline(always)]
-    pub fn get_internal_field(
+    pub fn internal_field(
         &self,
         scope: &mut ValueScope<'scope>,
         index: usize,

@@ -1,4 +1,4 @@
-use super::{Integer, Seal, Unseal, Value};
+use super::{Integer, Number, Primitive, Seal, Unseal, Value};
 
 /// A 32-bit unsigned integer value.
 #[derive(Copy, Clone)]
@@ -33,6 +33,20 @@ impl<'scope> TryFrom<Value<'scope>> for Uint32<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::Uint32>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<Uint32<'scope>> for Primitive<'scope> {
+    #[inline(always)]
+    fn from(value: Uint32<'scope>) -> Self {
+        Primitive(value.0.into())
+    }
+}
+
+impl<'scope> From<Uint32<'scope>> for Number<'scope> {
+    #[inline(always)]
+    fn from(value: Uint32<'scope>) -> Self {
+        Number(value.0.into())
     }
 }
 

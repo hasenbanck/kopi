@@ -1,6 +1,6 @@
 pub use v8::NewStringType;
 
-use super::{Name, Seal, Unseal, Value, ValueScope};
+use super::{Name, Primitive, Seal, Unseal, Value, ValueScope};
 
 /// Maximal string length.
 /// As declared in "include/v8-primitive.h".
@@ -45,6 +45,13 @@ impl<'scope> TryFrom<Value<'scope>> for String<'scope> {
     fn try_from(value: Value<'scope>) -> Result<Self, Self::Error> {
         let inner = v8::Local::<v8::String>::try_from(value.0)?;
         Ok(Self(inner))
+    }
+}
+
+impl<'scope> From<String<'scope>> for Primitive<'scope> {
+    #[inline(always)]
+    fn from(value: String<'scope>) -> Self {
+        Primitive(value.0.into())
     }
 }
 

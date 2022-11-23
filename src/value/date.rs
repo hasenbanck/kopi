@@ -59,22 +59,19 @@ impl<'scope> Date<'scope> {
 
 #[cfg(test)]
 mod test {
-    use crate::value::{test::test_value, Date};
+    use crate::{test_value, value::Date};
 
     // TODO write a test fixture to test constructors.
 
     #[test]
     fn value() {
-        test_value("new Date(0)", |v| {
-            let v = Date::try_from(v).expect("Not a Date");
+        test_value!("new Date(0)", |v: Date| {
             assert_eq!(v.value(), 0.0);
         });
-        test_value("new Date('1995-12-17T03:24:00')", |v| {
-            let v = Date::try_from(v).expect("Not a Date");
+        test_value!("new Date('1995-12-17T03:24:00')", |v: Date| {
             assert_eq!(v.value(), 819167040000.0);
         });
-        test_value("new Date('2020-05-12T23:50:21.817Z')", |v| {
-            let v = Date::try_from(v).expect("Not a Date");
+        test_value!("new Date('2020-05-12T23:50:21.817Z')", |v: Date| {
             assert_eq!(v.value(), 1589327421817.0);
         });
     }

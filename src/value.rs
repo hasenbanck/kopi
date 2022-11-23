@@ -201,13 +201,10 @@ pub(crate) mod test {
     use super::{new_string, NewStringType, Seal, Value, ValueScope};
     use crate::{error::create_error_from_exception, initialize_with_defaults};
 
-    pub(crate) fn test_value<SOURCE, F>(source: SOURCE, test: F)
+    pub(crate) fn test_value<F>(source: &str, test: F)
     where
-        SOURCE: AsRef<str>,
         F: for<'scope> FnOnce(Value<'scope>),
     {
-        let source = source.as_ref();
-
         initialize_with_defaults();
 
         let isolate = &mut v8::Isolate::new(v8::CreateParams::default());
@@ -233,6 +230,16 @@ pub(crate) mod test {
         };
 
         test(v8_value.seal())
+    }
+
+    #[macro_export]
+    macro_rules! test_value {
+        ($source:literal, | $ident:ident : $value_type:ty | $block:block) => {
+            $crate::value::test::test_value($source, |v| {
+                let $ident = <$value_type>::try_from(v).expect("Not the expected type");
+                $block
+            })
+        };
     }
 
     #[test]

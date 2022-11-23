@@ -72,19 +72,17 @@ impl<'scope> Integer<'scope> {
 
 #[cfg(test)]
 mod test {
-    use crate::value::{test::test_value, Integer};
+    use crate::{test_value, value::Integer};
 
     // TODO write a test fixture to test constructors.
 
     #[test]
     fn value() {
-        test_value("42", |v| {
-            let i = Integer::try_from(v).expect("Not an integer");
-            assert_eq!(i.value(), 42);
+        test_value!("42", |v: Integer| {
+            assert_eq!(v.value(), 42);
         });
-        test_value("-100", |v| {
-            let i = Integer::try_from(v).expect("Not an integer");
-            assert_eq!(i.value(), -100);
+        test_value!("-100", |v: Integer| {
+            assert_eq!(v.value(), -100);
         });
     }
 }

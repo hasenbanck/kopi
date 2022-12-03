@@ -6,9 +6,12 @@ provide JITed ECMAScript execution and aims to use very few dependencies.
 
 ## Status ##
 
-This crate is still in the design phase and in large parts unfinished.
-Once it reaches a certain stage of maturity it will be published to
-cargo.io.
+The development is currently on hold, since I'm not fully sold right now on
+the practicability of using an ECMA based JIT VM in the domain where it should
+be mainly used (e.g. game development). A lot of targets forbid the usage of
+JITed VMs (for example most consoles) and it's not usable on the web at all.
+
+You are of course free to use this code and continue developing it if you want.
 
 ## Features
 
@@ -65,17 +68,6 @@ Some tests need a ICU data file placed inside the project root directory
 (`icudt71l.dat` for little endian or `icudt71b.dat` for big endian systems).
 
 You need to download a ICU version 71 data file from the ICU project [release page](https://github.com/unicode-org/icu/releases).
-
-## Roadmap
-
-Sooner than later following functionality will be added:
-
- * Module loading
- * Embedded types
- * Fallible fastcall functions
- * Optional serde support
-
-We're not yet totally sure how the API for async should look. 
 
 ## Documentation
 
